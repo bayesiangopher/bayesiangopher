@@ -21,7 +21,8 @@ func TestKmeans(t *testing.T) {
 		log.Fatal(err)
 	}
 
-	lines := strings.Split(string(content), "\n")[1:]
+	lines := strings.Split(string(content), "\n")
+	lines = lines[:len(lines)-1]
 	irisData := make([][]float64, len(lines))
 	irisLabels := make([]string, len(lines))
 	for ii, line := range lines {
