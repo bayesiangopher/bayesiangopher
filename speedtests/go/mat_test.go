@@ -3,6 +3,7 @@ package speedtests
 import (
 	"fmt"
 	"gonum.org/v1/gonum/mat"
+	"math"
 	"testing"
 )
 
@@ -74,9 +75,13 @@ func TestDotOfMatrices(t *testing.T) {
 	B := createRandomMatrix(16, 16)
 	check := dotOfVectors(A.RowView(0), B.ColView(0))
 	C := dotOfMatrices(A, B)
-	if C.At(0, 0) != check {
+	if !almostEqual(check, C.At(0, 0), 1e-8) {
 		t.Fatal("Перемножение матрицы реализовано неправильно.")
 	}
+}
+
+func almostEqual(a, b, eps float64) bool {
+	return math.Abs(a - b) <= eps
 }
 
 // TestDeterminantOfMatrix testing speed and result of work
@@ -130,5 +135,185 @@ func TestCholeskyOfMatrix(t *testing.T) {
 	T.Mul(L, L.T())
 	if !mat.EqualApprox(&T, &AS, 1e-8) {
 		t.Errorf("Разложение Холецкого реализованно неправильно.")
+	}
+}
+
+// BenchmarkCreateRandomMatrix testing speed and memory use of
+// createRandomMatrix function
+func BenchmarkCreateRandomMatrix(b *testing.B) {
+	for key, value := range mapMatTest {
+		b.Run(key, benchCreateRandomMatrixFunc(value[0], value[1]))
+	}
+}
+
+func benchCreateRandomMatrixFunc(N, M int) func(b *testing.B) {
+	return func(b *testing.B) {
+		b.ReportAllocs()
+		b.N = 10
+		b.ResetTimer()
+		for i := 0; i < b.N; i++ {
+			b.StartTimer()
+			A := createRandomMatrix(N, M)
+			b.StopTimer()
+			A.IsZero()
+		}
+	}
+}
+
+// BenchmarkScaleMatrix testing speed and memory use vector scaling
+func BenchmarkScaleMatrix(b *testing.B) {
+	for key, value := range mapMatTest {
+		b.Run(key, benchScaleMatrixFunc(value[0], value[1], 5.25))
+	}
+}
+
+func benchScaleMatrixFunc(N, M int, alpha float64) func(b *testing.B) {
+	return func(b *testing.B) {
+		A := createRandomMatrix(N, M)
+		b.ReportAllocs()
+		b.N = 10
+		b.ResetTimer()
+		for i := 0; i < b.N; i++ {
+			b.StartTimer()
+			scaleMatrix(alpha, A)
+			b.StopTimer()
+			scaleMatrix(1 / alpha, A)
+		}
+	}
+}
+
+// BenchmarkTransposeMatrix testing speed and memory use vector scaling
+func BenchmarkTransposeMatrix(b *testing.B) {
+	for key, value := range mapMatTest {
+		b.Run(key, benchTransposeMatrixFunc(value[0], value[1]))
+	}
+}
+
+func benchTransposeMatrixFunc(N, M int) func(b *testing.B) {
+	return func(b *testing.B) {
+		A := createRandomMatrix(N, M)
+		b.ReportAllocs()
+		b.N = 10
+		b.ResetTimer()
+		for i := 0; i < b.N; i++ {
+			b.StartTimer()
+			B := transposeMatrix(A)
+			b.StopTimer()
+			_ = B
+		}
+	}
+}
+
+// BenchmarkDotOfMatrix testing speed and memory use vector scaling
+func BenchmarkDotOfMatrix(b *testing.B) {
+	for key, value := range mapMatTest {
+		b.Run(key, benchDotOfMatrixFunc(value[0], value[1]))
+	}
+}
+
+func benchDotOfMatrixFunc(N, M int) func(b *testing.B) {
+	return func(b *testing.B) {
+		A := createRandomMatrix(N, M)
+		B := createRandomMatrix(N, M)
+		b.ReportAllocs()
+		b.N = 10
+		b.ResetTimer()
+		for i := 0; i < b.N; i++ {
+			b.StartTimer()
+			C := dotOfMatrices(A, B)
+			b.StopTimer()
+			_ = C
+		}
+	}
+}
+
+// BenchmarkDotOfMatrix testing speed and memory use vector scaling
+func BenchmarkDeterminantOfMatrix(b *testing.B) {
+	for key, value := range mapMatTest {
+		b.Run(key, benchDeterminantOfMatrixFunc(value[0], value[1]))
+	}
+}
+
+func benchDeterminantOfMatrixFunc(N, M int) func(b *testing.B) {
+	return func(b *testing.B) {
+		A := createRandomMatrix(N, M)
+		B := createRandomMatrix(N, M)
+		b.ReportAllocs()
+		b.N = 10
+		b.ResetTimer()
+		for i := 0; i < b.N; i++ {
+			b.StartTimer()
+			C := dotOfMatrices(A, B)
+			b.StopTimer()
+			_ = C
+		}
+	}
+}
+
+// BenchmarkDotOfMatrix testing speed and memory use vector scaling
+func BenchmarkEigensOfMatrix(b *testing.B) {
+	for key, value := range mapMatTest {
+		b.Run(key, benchEigensOfMatrixFunc(value[0], value[1]))
+	}
+}
+
+func benchEigensOfMatrixFunc(N, M int) func(b *testing.B) {
+	return func(b *testing.B) {
+		A := createRandomMatrix(N, M)
+		b.ReportAllocs()
+		b.N = 10
+		b.ResetTimer()
+		for i := 0; i < b.N; i++ {
+			b.StartTimer()
+			ev, evec := eigensOfMatrix(A)
+			b.StopTimer()
+			_, _ = ev, evec
+		}
+	}
+}
+
+// BenchmarkDotOfMatrix testing speed and memory use vector scaling
+func BenchmarkSVDOfMatrix(b *testing.B) {
+	for key, value := range mapMatTest {
+		b.Run(key, benchSVDOfMatrixFunc(value[0], value[1]))
+	}
+}
+
+func benchSVDOfMatrixFunc(N, M int) func(b *testing.B) {
+	return func(b *testing.B) {
+		A := createRandomMatrix(N, M)
+		b.ReportAllocs()
+		b.N = 10
+		b.ResetTimer()
+		for i := 0; i < b.N; i++ {
+			b.StartTimer()
+			S, U, V := SVDOfMatrix(A)
+			b.StopTimer()
+			_, _, _ = S, U, V
+		}
+	}
+}
+
+// BenchmarkDotOfMatrix testing speed and memory use vector scaling
+func BenchmarkCholeskyOfMatrix(b *testing.B) {
+	for key, value := range mapMatTest {
+		b.Run(key, benchCholeskyOfMatrixFunc(value[0], value[1]))
+	}
+}
+
+func benchCholeskyOfMatrixFunc(N, M int) func(b *testing.B) {
+	return func(b *testing.B) {
+		A := createRandomMatrix(N, M)
+		var AS mat.SymDense
+		AS.SymOuterK(1, A)
+		b.ReportAllocs()
+		b.N = 10
+		b.ResetTimer()
+		for i := 0; i < b.N; i++ {
+			b.StartTimer()
+			L := choleskyOfMatrix(&AS)
+			b.StopTimer()
+			_ = L
+		}
 	}
 }
