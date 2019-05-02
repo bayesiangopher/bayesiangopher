@@ -1,66 +1,70 @@
-package main
+// Set of wrappers for gonum vector algebra
+
+package speedtests
 
 import (
 	"fmt"
 	"gonum.org/v1/gonum/mat"
 	"math/rand"
+	"time"
 )
 
 const (
-	N = 1000000 // Size of vectors
+	VN = 1 << (iota * 10) // Sizes of vectors
+	VNs
+	VNm
+	VNl
 )
 
-func main() {
-
-	u := mat.NewVecDense(N, nil)
-	for i := 0; i < N; i++ {
-		rand.Seed(int64(i))
-		u.SetVec(i, rand.Float64()*100)
-	}
-
+// createRandomVector create random N vector
+func createRandomVector(N int) *mat.VecDense {
 	v := mat.NewVecDense(N, nil)
 	for i := 0; i < N; i++ {
-		rand.Seed(int64(i+N))
-		v.SetVec(i, rand.Float64()*100)
+		rand.Seed(int64(time.Now().UnixNano()))
+		v.SetVec(i, rand.Float64() * 100)
 	}
-
-	fmt.Printf("Vector 'u': %v\n\n",
-		mat.Formatted(u, mat.Prefix(" "), mat.Excerpt(3)))
-	fmt.Printf("Vector 'v': %v\n",
-		mat.Formatted(v, mat.Prefix(" "), mat.Excerpt(3)))
-
-	// Vector + Vector test:
-	w := mat.NewVecDense(N, nil)
-	w.AddVec(u, v)
-	fmt.Printf("Vector 'w': %v\n\n",
-		mat.Formatted(w, mat.Prefix(" "), mat.Excerpt(3)))
-
-	// Add Vector + alpha * Vector test:
-	w = mat.NewVecDense(N, nil)
-	w.AddScaledVec(u, 2, v)
-	fmt.Printf("Vector 'w': %v\n\n",
-		mat.Formatted(w, mat.Prefix(" "), mat.Excerpt(3)))
-
-	// Subtract Vector from Vector test:
-	w = mat.NewVecDense(N, nil)
-	w.SubVec(u, v)
-	fmt.Printf("Vector 'w': %v\n\n",
-		mat.Formatted(w, mat.Prefix(" "), mat.Excerpt(3)))
-
-	// Scale Vector by alpha test:
-	w = mat.NewVecDense(N, nil)
-	w.ScaleVec(23, u)
-	fmt.Printf("Vector 'w': %v\n\n",
-		mat.Formatted(w, mat.Prefix(" "), mat.Excerpt(3)))
-
-	// Dot of Vectors
-	d := mat.Dot(u, v)
-	fmt.Printf("Vector 'd': %v\n\n", d)
-
-	// Frobenius norm of Vector:
-	f := mat.Norm(u, 2)
-	fmt.Printf("Frobenius norm of vector 'u': %d", f)
-
+	return v
 }
 
-//func add_test(u *mat.VecDense, )
+// scaleVector scale vector v
+func scaleVector(v *mat.VecDense, alpha float64) {
+	v.ScaleVec(alpha, v)
+}
+
+// frobeniusNormOfVector return Frobenius norm of vector
+func frobeniusNormOfVector(v *mat.VecDense) (f float64) {
+	f = mat.Norm(v, 2)
+	return
+}
+
+// additionOfVectors return sum of vectors v, u,
+// if alpha is not 0 return scaled sum of vectors (v + alpha * u)
+func additionOfVectors(v, u *mat.VecDense, alpha float64) (w *mat.VecDense) {
+	w = mat.NewVecDense(v.Len(), nil)
+	if alpha == 0.0 {
+		w.AddVec(u, v)
+	}
+	if alpha != 0.0 {
+		w.AddScaledVec(v, alpha, u)
+	}
+	return
+}
+
+// subtractOfVectors return subtract of vectors v, u
+func subtractOfVectors(v, u *mat.VecDense) (w *mat.VecDense) {
+	w = mat.NewVecDense(v.Len(), nil)
+	w.SubVec(v, u)
+	return
+}
+
+// dotOfVectors return result of multiplication of two vectors
+func dotOfVectors(v, u *mat.VecDense) (w float64) {
+	w = mat.Dot(v, u)
+	return
+}
+
+// vecPrint print vector in stdout
+func vecPrint(v *mat.VecDense) {
+	fmt.Printf("%v\n",
+		mat.Formatted(v, mat.Prefix(" "), mat.Excerpt(3)))
+}

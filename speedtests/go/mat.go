@@ -1,4 +1,4 @@
-package main
+package speedtests
 
 import (
 	"fmt"
@@ -8,11 +8,12 @@ import (
 )
 
 const (
-	N = 1000 // Len of rows
-	M = 1000 // Len of columns
+	N = 1000    // Len of rows
+	M = 1000    // Len of columns
+	K = 1000000 // Len of vectors
 )
 
-func main() {
+func matTests() {
 
 	// In memory creating Matrix's elements:
 	v := make([]float64, N*M)
@@ -27,7 +28,7 @@ func main() {
 	matPrint(A)
 
 	// Setting and getting functions:
-	a := A.At(0,2)
+	a := A.At(0, 2)
 	fmt.Println("A[0, 2]:", a)
 
 	A.Set(0, 2, -1.5)
@@ -50,7 +51,7 @@ func main() {
 	matPrint(A)
 	column := make([]float64, N)
 	for i := 0; i < N; i++ {
-		rand.Seed(int64(i + N * 2))
+		rand.Seed(int64(i + N*2))
 		column[i] = rand.Float64() * 100
 	}
 	A.SetCol(0, column)
