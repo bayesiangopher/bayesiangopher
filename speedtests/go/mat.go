@@ -5,169 +5,90 @@ import (
 	"gonum.org/v1/gonum/mat"
 	"log"
 	"math/rand"
+	"time"
 )
 
-const (
-	N = 1000    // Len of rows
-	M = 1000    // Len of columns
-	K = 1000000 // Len of vectors
-)
-
-func matTests() {
-
-	// In memory creating Matrix's elements:
+// createRandomMatrix create NxM random Matrix [0;100)
+func createRandomMatrix(N, M int) (A *mat.Dense) {
 	v := make([]float64, N*M)
 	for i := 0; i < N*M; i++ {
-		rand.Seed(int64(i))
+		rand.Seed(int64(time.Now().UnixNano()))
 		v[i] = rand.Float64() * 100
 	}
+	A = mat.NewDense(N, M, v)
+	return
+}
 
-	// Create a new Matrix:
-	A := mat.NewDense(N, M, v)
-	fmt.Println("A:")
-	matPrint(A)
+// additionOfMatrices return result of addition of two matrices
+func additionOfMatrices(A, B *mat.Dense) (C *mat.Dense) {
+	Rows, Cols := A.Dims()
+	C = mat.NewDense(Rows, Cols, nil)
+	C.Add(A, B)
+	return
+}
 
-	// Setting and getting functions:
-	a := A.At(0, 2)
-	fmt.Println("A[0, 2]:", a)
+// subtractOfMatrices return result of subtract of two matrices
+func subtractOfMatrices(A, B *mat.Dense) (C *mat.Dense) {
+	Rows, Cols := A.Dims()
+	C = mat.NewDense(Rows, Cols, nil)
+	C.Sub(A, B)
+	return
+}
 
-	A.Set(0, 2, -1.5)
-	a = A.At(0, 2)
-	fmt.Println("A[0, 2]:", a)
+// scaleMatrix make inplace scaling of given matrix
+func scaleMatrix(alpha float64, A *mat.Dense) {
+	A.Scale(alpha, A)
+}
 
-	// Extracting columns and rows:
-	fmt.Println("Row 1 of A:")
-	matPrint(A.RowView(0))
-	fmt.Println("Column 2 of A:")
-	matPrint(A.ColView(1))
+// transposingMatrix return interface Matrix with structure of
+// transposed matrix
+func transposeMatrix(A *mat.Dense) mat.Matrix {
+	return A.T()
+}
 
-	// Set rows and columns:
-	row := make([]float64, M)
-	for i := 0; i < M; i++ {
-		rand.Seed(int64(i + M))
-		row[i] = rand.Float64() * 100
-	}
-	A.SetRow(0, row)
-	matPrint(A)
-	column := make([]float64, N)
-	for i := 0; i < N; i++ {
-		rand.Seed(int64(i + N*2))
-		column[i] = rand.Float64() * 100
-	}
-	A.SetCol(0, column)
-	matPrint(A)
+// dotOfMatrices return dot of matrices
+func dotOfMatrices(A, B *mat.Dense) (C *mat.Dense) {
+	Rows, Cols := A.Dims()
+	C = mat.NewDense(Rows, Cols, nil)
+	C.Product(A, B)
+	return
+}
 
-	// Addition of Matrices:
-	B := mat.NewDense(N, M, nil)
-	B.Add(A, A)
-	fmt.Println("B: ")
-	matPrint(B)
+// determinantOfMatrix return determinant of given matrix
+func determinantOfMatrix(A *mat.Dense) (d float64) {
+	d = mat.Det(A)
+	return
+}
 
-	// Subtractions of Matrices:
-	C := mat.NewDense(N, M, nil)
-	C.Sub(B, A)
-	fmt.Println("B - A:")
-	matPrint(C)
-
-	// Scaling:
-	C.Scale(3.5, B)
-	fmt.Println("3.5 * B:")
-	matPrint(C)
-
-	// Transposing:
-	// Now we cant set any of A.T() values.
-	fmt.Println("A'")
-	matPrint(A.T())
-
-	// Multiplication:
-	D := mat.NewDense(N, M, nil)
-	D.Product(A, B)
-	fmt.Println("A * B:")
-	matPrint(D)
-
-	// Product use for multiply any matrices:
-	D.Product(D, A, B.T(), D, D, D)
-	fmt.Println("D * A * B' * D * D * D")
-	matPrint(D)
-
-	// Custom functions:
-	D.Apply(sumOfIndices, A)
-	fmt.Println("D:")
-	matPrint(D)
-
-	// Determinant:
-	E := A.Slice(0, 5, 0, 5)
-	d := mat.Det(E)
-	fmt.Printf("Determinant of A[0, 5][0, 5] is: %e\n", d)
-
-	// Trace:
-	t := mat.Trace(E)
-	fmt.Printf("Trace of A[0, 5][0, 5]: %e\n", t)
-
-	// Init Matrix another way (as product of 2 matrices):
-	var G mat.Dense
-	G.Mul(A, A)
-	matPrint(&G)
-	G.Reset()
-	fmt.Printf("Is G zero matrix: %t", G.IsZero())
-
-	// Eigen:
+// eigensOfMatrix returns right eigen vectors and values
+func eigensOfMatrix(A *mat.Dense) (eigenValues []complex128, eigenVectors *mat.CDense){
 	var eig mat.Eigen
-	ok := eig.Factorize(A, mat.EigenBoth)
-	if !ok {
+	if ok := eig.Factorize(A, mat.EigenBoth); !ok {
 		log.Fatal("Eigendecomposition failed")
 	}
-	fmt.Printf("Eigenvalues of A:\n%v\n", eig.Values(nil))
-	ev := eig.VectorsTo(nil)
-	r, c := ev.Dims()
-	fmt.Printf("Dim of Eigenvectors matrix of A: %d, %d\n", r, c)
+	eigenValues = eig.Values(nil)
+	eigenVectors = eig.VectorsTo(nil)
+	return
+}
 
-	// SVD (Singular Value Decomposition):
-	var svd mat.SVD
-	// Full because N == M
-	ok = svd.Factorize(A, mat.SVDFull)
-	if !ok {
+// SVDOfMatrix make SVD decomposition of given matrix
+func SVDOfMatrix(A *mat.Dense) (S []float64, U, V *mat.Dense) {
+	var SVD mat.SVD
+	if ok := SVD.Factorize(A, mat.SVDFull); !ok {
 		log.Fatal("SVD failed")
 	}
-	fmt.Printf("Singular values of A:\n%v\n", svd.Values(nil))
-	fmt.Println("U (mxm orthogonal matrix:")
-	matPrint(svd.UTo(nil))
-	fmt.Println("V (nxn orthogonal matrix:")
-	matPrint(svd.VTo(nil))
+	S, U, V = extractSVD(&SVD)
+	return
+}
 
-	// Invertible matrix:
-	kek := mat.NewDense(2, 2, []float64{
-		4, 0,
-		0, 4,
-	})
-	var ia mat.Dense
-	err := ia.Inverse(kek)
-	if err != nil {
-		log.Fatal("Inverse failed")
-	}
-	matPrint(kek)
-	fmt.Println("Result of Inverse check:")
-	var l mat.Dense
-	l.Mul(kek, &ia)
-	matPrint(&l)
-
-	// Cholesky decomposition:
-	var AS mat.SymDense
-	AS.SymOuterK(1, A)
-	fmt.Println("AS (symmetric):")
-	matPrint(&AS)
-	var chol mat.Cholesky
-	if ok = chol.Factorize(&AS); !ok {
+// choleskyOfMatrix returns L of A = L'L Cholesky decomposition
+func choleskyOfMatrix(A *mat.SymDense) (L *mat.TriDense) {
+	var cholesky mat.Cholesky
+	if ok := cholesky.Factorize(A); !ok {
 		log.Fatal("A matrix is not positive semi-definite.")
 	}
-	L := chol.LTo(nil)
-	var test mat.Dense
-	test.Mul(L, L.T())
-	fmt.Println("AS:")
-	matPrint(&AS)
-	fmt.Println("Result of check (must be equal AS):")
-	matPrint(&test)
-
+	L = cholesky.LTo(nil)
+	return
 }
 
 // matPrint print Matrix to Stdout
@@ -178,4 +99,9 @@ func matPrint(A mat.Matrix) {
 // sumOfIndices return sum of two indices
 func sumOfIndices(i, j int, v float64) float64 {
 	return float64(i + j)
+}
+
+// extractSVD extracts SVD decomposition results
+func extractSVD(svd *mat.SVD) (s []float64, u, v *mat.Dense) {
+	return svd.Values(nil), svd.UTo(nil), svd.VTo(nil)
 }

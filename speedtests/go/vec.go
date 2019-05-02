@@ -9,14 +9,7 @@ import (
 	"time"
 )
 
-const (
-	VN = 1 << (iota * 10) // Sizes of vectors
-	VNs
-	VNm
-	VNl
-)
-
-// createRandomVector create random N vector
+// createRandomVector create random N vector [0;100)
 func createRandomVector(N int) *mat.VecDense {
 	v := mat.NewVecDense(N, nil)
 	for i := 0; i < N; i++ {
@@ -58,7 +51,7 @@ func subtractOfVectors(v, u *mat.VecDense) (w *mat.VecDense) {
 }
 
 // dotOfVectors return result of multiplication of two vectors
-func dotOfVectors(v, u *mat.VecDense) (w float64) {
+func dotOfVectors(v, u mat.Vector) (w float64) {
 	w = mat.Dot(v, u)
 	return
 }

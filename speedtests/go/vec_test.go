@@ -6,20 +6,10 @@ import (
 	"testing"
 )
 
-// mapTest - map of tests names and dims of vectors
-var mapTest = map[string]int{
-	"Size=1024": 1024,
-	"Size=16384": 16384,
-	"Size=65536": 65536,
-	"Size=131072": 131072,
-	"Size=262144": 262144,
-	"Size=524288": 524288,
-}
-
 // TestCreateRandomVector testing speed and result of work
 // createRandomVector function
 func TestCreateRandomVector(t *testing.T) {
-	for key, value := range mapTest {
+	for key, value := range mapVecTest {
 		t.Run(key, testCreateRandomVectorFunc(value))
 	}
 }
@@ -40,7 +30,7 @@ func TestScaleVector(t *testing.T) {
 	scaleVector(v, 5.25)
 	fmt.Println("Vector 'v' after scaling:"); vecPrint(v)
 	if v.AtVec(5) / check != 5.25 {
-		t.Fatal("ошибка масштабирования.")
+		t.Fatal("Ошибка масштабирования.")
 	}
 }
 
@@ -101,7 +91,7 @@ func TestDotOfVectors(t *testing.T) {
 // BenchmarkCreateRandomVector testing speed and memory use of
 // createRandomVector function
 func BenchmarkCreateRandomVector(b *testing.B) {
-	for key, value := range mapTest {
+	for key, value := range mapVecTest {
 		b.Run(key, benchCreateRandomVectorFunc(value))
 	}
 }
@@ -122,7 +112,7 @@ func benchCreateRandomVectorFunc(N int) func(b *testing.B) {
 
 // BenchmarkScaleVector testing speed and memory use vector scaling
 func BenchmarkScaleVector(b *testing.B) {
-	for key, value := range mapTest {
+	for key, value := range mapVecTest {
 		b.Run(key, benchScaleVectorFunc(value, 5.25))
 	}
 }
@@ -144,7 +134,7 @@ func benchScaleVectorFunc(N int, alpha float64) func(b *testing.B) {
 
 // BenchmarkScaleVector testing speed and memory use vector scaling
 func BenchmarkFrobeniusNormOfVector(b *testing.B) {
-	for key, value := range mapTest {
+	for key, value := range mapVecTest {
 		b.Run(key, benchFrobeniusNormOfVectorFunc(value))
 	}
 }
@@ -166,7 +156,7 @@ func benchFrobeniusNormOfVectorFunc(N int) func(b *testing.B) {
 
 // BenchmarkAdditionOfVectors testing speed and memory use vector scaling
 func BenchmarkAdditionOfVectors(b *testing.B) {
-	for key, value := range mapTest {
+	for key, value := range mapVecTest {
 		b.Run(key, benchAdditionOfVectorsFunc(value))
 	}
 }
@@ -189,7 +179,7 @@ func benchAdditionOfVectorsFunc(N int) func(b *testing.B) {
 
 // BenchmarkAdditionOfVectors testing speed and memory use of vector scaling
 func BenchmarkSubtractOfVectors(b *testing.B) {
-	for key, value := range mapTest {
+	for key, value := range mapVecTest {
 		b.Run(key, benchSubtractOfVectorsFunc(value))
 	}
 }
@@ -212,7 +202,7 @@ func benchSubtractOfVectorsFunc(N int) func(b *testing.B) {
 
 // BenchmarkDotOfVectors testing speed and memory use of vectors dot
 func BenchmarkDotOfVectors(b *testing.B) {
-	for key, value := range mapTest {
+	for key, value := range mapVecTest {
 		b.Run(key, benchDotOfVectorsFunc(value))
 	}
 }
@@ -232,15 +222,3 @@ func benchDotOfVectorsFunc(N int) func(b *testing.B) {
 		}
 	}
 }
-
-
-
-
-
-
-
-
-
-
-
-
