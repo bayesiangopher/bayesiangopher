@@ -1,26 +1,5 @@
-from .vec import *
-
-
-dictVecSize = {
-    "Size=1024": 1024,
-    "Size=16384": 16384,
-    "Size=65536": 65536,
-    "Size=131072": 131072,
-    "Size=262144": 262144,
-    "Size=524288": 524288
-}
-
-
-BEGIN = "=================BEGIN OF TEST=================="
-END = "=================END OF TEST====================\n"
-
-
-def out(func):
-    def wrapper(*args):
-        print(BEGIN)
-        func(*args)
-        print(END)
-    return wrapper
+from vec import *
+from common import *
 
 
 def create_random_vector_set():
@@ -48,9 +27,9 @@ def scale_vector_set():
         alpha = 5.25
         vec = np.random.rand(shape) * 100
         check = vec[0]
-        scale_vector(vec, alpha)
+        scaled_vec = scale_vector(vec, alpha)
         print(f"Scaled random vector with size {shape}.\n")
-        print(f"Alpha after scale: {vec[0]/check} \n")
+        print(f"Alpha after scale: {scaled_vec[0]/check} \n")
 
     for shape in dictVecSize.values():
         test(shape)
@@ -129,7 +108,7 @@ def dot_of_vectors_set():
 
 if __name__ == '__main__':
     # create_random_vector_set()
-    # scale_vector_set()
+    scale_vector_set()
     # frobenius_norm_of_vector_set()
     # addition_of_vectors_set()
     # subtract_of_vectors_set()

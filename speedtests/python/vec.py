@@ -7,41 +7,10 @@
 # - subtract of vectors;
 # - dot of vectors.
 
-import os
-import time
-import traceback
+
 import numpy as np
 from numpy import linalg as LA
-from memory_profiler import profile
-
-DEFAULT = 10
-try:
-    count = os.environ["PYTHON_TESTS_COUNT"]
-except KeyError:
-    count = DEFAULT
-except Exception as e:
-    print(traceback.format_exc())
-    raise e
-
-
-def timer(count):
-    """
-    Таймер для замера скорости работы тестируемых функций.
-    :param count: int - кол-во прогонов функции.
-    """
-
-    def wrp(func):
-        def wrapper(*args, **kwargs):
-            start = time.time()
-            for n in range(count):
-                value = func(*args, **kwargs)
-            end = time.time()
-            runtime = (end - start)/count
-            print(f"\nTime of work {func.__name__}({args}): {runtime}\n")
-            return value
-        # декоратор profile - изменяет расход памяти исполняемым кодом.
-        return profile(precision=10)(wrapper)
-    return wrp
+from common import *
 
 
 @timer(count=count)
@@ -57,14 +26,14 @@ def create_random_vector(n: int) -> np.ndarray:
 
 
 @timer(count=count)
-def scale_vector(vec: np.ndarray, alpha: float):
+def scale_vector(vec: np.ndarray, alpha: float) -> np.ndarray:
     """
     Масштабирует переданный вектор на alpha.
     :param vec: np.ndarray - вектор для масштабирования;
     :param alpha: float - параметр масштабирования.
     """
 
-    vec * alpha
+    return vec * alpha
 
 
 @timer(count=count)

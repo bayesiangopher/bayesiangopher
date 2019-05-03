@@ -19,6 +19,11 @@ func createRandomMatrix(N, M int) (A *mat.Dense) {
 	return
 }
 
+// scaleMatrix make inplace scaling of given matrix
+func scaleMatrix(alpha float64, A *mat.Dense) {
+	A.Scale(alpha, A)
+}
+
 // additionOfMatrices return result of addition of two matrices
 func additionOfMatrices(A, B *mat.Dense) (C *mat.Dense) {
 	Rows, Cols := A.Dims()
@@ -33,11 +38,6 @@ func subtractOfMatrices(A, B *mat.Dense) (C *mat.Dense) {
 	C = mat.NewDense(Rows, Cols, nil)
 	C.Sub(A, B)
 	return
-}
-
-// scaleMatrix make inplace scaling of given matrix
-func scaleMatrix(alpha float64, A *mat.Dense) {
-	A.Scale(alpha, A)
 }
 
 // transposingMatrix return interface Matrix with structure of
@@ -63,7 +63,7 @@ func determinantOfMatrix(A *mat.Dense) (d float64) {
 // eigensOfMatrix returns right eigen vectors and values
 func eigensOfMatrix(A *mat.Dense) (eigenValues []complex128, eigenVectors *mat.CDense){
 	var eig mat.Eigen
-	if ok := eig.Factorize(A, mat.EigenBoth); !ok {
+	if ok := eig.Factorize(A, mat.EigenRight); !ok {
 		log.Fatal("Eigendecomposition failed")
 	}
 	eigenValues = eig.Values(nil)
