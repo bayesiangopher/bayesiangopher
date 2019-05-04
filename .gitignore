@@ -13,3 +13,7 @@
 
 # IDE files
 .idea
+
+# Python files:
+venv
+__pycache__
