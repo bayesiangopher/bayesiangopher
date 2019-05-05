@@ -14,10 +14,6 @@ except Exception as e:
     raise e
 
 
-BEGIN = "=================BEGIN OF TEST=================="
-END = "=================END OF TEST====================\n"
-
-
 def timer(count):
     """
     Таймер для замера скорости работы тестируемых функций.
@@ -36,6 +32,10 @@ def timer(count):
         # декоратор profile - изменяет расход памяти исполняемым кодом.
         return profile(precision=10)(wrapper)
     return wrp
+
+
+BEGIN = "=================BEGIN OF TEST=================="
+END = "=================END OF TEST====================\n"
 
 
 def out(func):

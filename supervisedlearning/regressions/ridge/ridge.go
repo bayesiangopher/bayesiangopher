@@ -30,7 +30,7 @@ type RidgeRegression struct {
 	StdErrs      []float64
 }
 
-// New returns a new ridge regression.
+// New returns a new ridge regressions.
 func New(x *mat64.Dense, y *mat64.Vector, l2Penalty float64) *RidgeRegression {
 	return &RidgeRegression{
 		X:         x,
@@ -41,7 +41,7 @@ func New(x *mat64.Dense, y *mat64.Vector, l2Penalty float64) *RidgeRegression {
 	}
 }
 
-// Regress runs the ridge regression to calculate coefficients.
+// Regress runs the ridge regressions to calculate coefficients.
 func (r *RidgeRegression) Regress() {
 	r.scaleX()
 	r.solveSVD()

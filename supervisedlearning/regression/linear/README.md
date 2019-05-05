@@ -1,1 +1,0 @@
-# Simple linear regression algorithm
