@@ -1,4 +1,4 @@
-package id3
+package ic3
 
 import (
 	"encoding/csv"
