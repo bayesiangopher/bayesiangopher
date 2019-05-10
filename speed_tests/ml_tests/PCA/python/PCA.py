@@ -29,19 +29,31 @@ def pca_func(data: np.ndarray, components: int) -> np.ndarray:
     covariance_matrix = np.cov(centred_data)
     print(f"Covariance matrix:\n {covariance_matrix}\n\n")
     eigen_vals, eigen_vecs = np.linalg.eig(covariance_matrix)
-    components_vecs = np.array([[eigen_vecs[0]], [np.linalg.norm(eigen_vecs[0])]])
-    for vec in eigen_vecs:
-        norm = np.linalg.norm(vec)
-        if components_vecs.shape[0] == components and norm > np.amax(components_vecs[1]):
-            idx = np.where(components_vecs[1] == np.amin(components_vecs[1]))
-            components_vecs[1][idx] = norm
-            components_vecs[0][idx] = vec
-        elif components_vecs.shape[0] < components:
-            np.append(components_vecs[0], vec, axis=0)
-            np.append(components_vecs[1], norm, axis=1)
-    print(f"Eigen vecs:\n {components_vecs[0][0]}\n\n")
-    X_pca = np.dot(components_vecs[0][0], centred_data)
+    print(f"Eigne vectors:\n {eigen_vecs}\n\n")
+    # components_vecs = np.array([[eigen_vecs.transpose()[0]], [np.linalg.norm(eigen_vecs[0])]])
+    # for vec in eigen_vecs.transpose():
+    #     norm = np.linalg.norm(vec)
+    #     if components_vecs.shape[0] == components and norm > np.amax(components_vecs[1]):
+    #         idx = np.where(components_vecs[1] == np.amin(components_vecs[1]))
+    #         components_vecs[1][idx] = norm
+    #         components_vecs[0][idx] = vec
+    #     elif components_vecs.shape[0] < components:
+    #         np.append(components_vecs[0], vec, axis=0)
+    #         np.append(components_vecs[1], norm, axis=1)
+    print(f"Eigen vec:\n {eigen_vecs[:, 1]}\n\n")
+    X_pca = np.dot(eigen_vecs[:, 1], centred_data)
     return X_pca
+
+
+def svd(X):
+    U, Sigma, Vh = np.linalg.svd(X,
+                                 full_matrices=False, # It's not necessary to compute the full matrix of U or V
+                                 compute_uv=True)
+    # Transform X with SVD components
+    print(U)
+    print(np.diag(Sigma))
+    X_svd = np.dot(U, np.diag(Sigma))
+    return X_svd
 
 
 class PCA:
@@ -100,7 +112,7 @@ class PCA:
     def projection(self, data, centred_data):
         _, eigenvecs = self.eigens(data)
         v = eigenvecs[:, 1]
-        print(f'HERE{v}')
+        print(f"Eigen vector:\n {v}\n\n")
         Xnew = np.dot(v, centred_data)
         print(f"New data:\n {Xnew}\n\n")
         return Xnew
@@ -124,18 +136,22 @@ if __name__ == "__main__":
     #     13.78706794, 13.85301221, 15.29003911, 18.0998018
     # ])
     # data = np.vstack((data_1, data_2))
-    centred_data, mean_matrix = PCA_tiny.moments(data)
-    cov_mat = PCA_tiny.covariance_matrix(data)
-    eigenvals, eigenvecs = PCA_tiny.eigens(cov_mat)
-    Xnew = PCA_tiny.projection(cov_mat, centred_data)
-    PCA_tiny.check(data, Xnew, mean_matrix, eigenvecs[:, 1])
-
-    from sklearn.decomposition import PCA
-    pca = PCA(n_components=1)
-    Xnew_sklearn = pca.fit_transform(np.transpose(data))
-
-    print(f"Our result:\n {Xnew}")
-    print(f"Sklearn result:\n {Xnew_sklearn}")
+    # centred_data, mean_matrix = PCA_tiny.moments(data)
+    # cov_mat = PCA_tiny.covariance_matrix(data)
+    # eigenvals, eigenvecs = PCA_tiny.eigens(cov_mat)
+    # Xnew = PCA_tiny.projection(cov_mat, centred_data)
+    # PCA_tiny.check(data, Xnew, mean_matrix, eigenvecs[:, 1])
+    #
+    # from sklearn.decomposition import PCA
+    # pca = PCA(n_components=1)
+    # Xnew_sklearn = pca.fit_transform(np.transpose(data))
+    #
+    # print(f"Our result:\n {Xnew}")
+    # print(f"Sklearn result:\n {Xnew_sklearn}")
 
     Xnew = pca_func(data, 1)
     print(f"Func result:\n {Xnew}")
+
+    Xnew = pca_func(data, 1)
+    print(f"Func result:\n {Xnew}")
+

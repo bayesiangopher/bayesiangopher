@@ -3,6 +3,7 @@ package linear
 import (
 	"fmt"
 	"testing"
+	"github.com/bayesiangopher/bayesiangopher/core"
 )
 
 // TestReadDataFromCSV - [OK]

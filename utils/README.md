@@ -1,1 +1,0 @@
-# Utils for correct/fast and convenient work of algorithms.
