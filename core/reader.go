@@ -9,21 +9,23 @@ import (
 )
 
 type Reader interface {
-	read()
+	Read()
 }
 
 type CSVReader struct {
+	Path string
 	Rows int
 	Data []Row
 }
 
-// read data from csv file to CSVReader instance
-func (r *CSVReader) read(path string) {
-	source, _ := os.Open(path)
+// Read read data from csv file to CSVReader instance
+func (r *CSVReader) Read(makeTrain bool) (train Train) {
+	source, _ := os.Open(r.Path)
 	defer source.Close()
 	for row := range rowsProcessing(source) {
 		r.Data = append(r.Data, Row{Data: row, Elements: len(row)})
 	}
+	if makeTrain { return &r.Data } else { return nil }
 }
 
 func rowsProcessing(f io.Reader) (ch chan []float64) {
