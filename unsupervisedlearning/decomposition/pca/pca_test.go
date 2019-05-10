@@ -39,4 +39,5 @@ func TestFit(t *testing.T) {
 		log.Fatal("Result mistake.")
 	}
 	fmt.Printf("Result of decomposition: %v \n", pca.Result)
+	_ = pca.Losses()
 }

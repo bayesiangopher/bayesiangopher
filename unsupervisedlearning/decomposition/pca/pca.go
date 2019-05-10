@@ -2,6 +2,7 @@ package pca
 
 import (
 	"errors"
+	"fmt"
 	"github.com/bayesiangopher/bayesiangopher/core"
 	"gonum.org/v1/gonum/mat"
 	"gonum.org/v1/gonum/stat"
@@ -48,6 +49,20 @@ func (pca *PCA) Fit(train core.Train, components int) (err error) {
 	var V mat.Dense; pca.SVD.VTo(&V)
 	pca.Result = mat.NewDense(r, c, nil)
 	pca.Result.Mul(pca.CentredTrain, &V)
+	return
+}
+
+func (pca *PCA) Losses() (relative float64) {
+	var V mat.Dense; pca.SVD.VTo(&V)
+	var check_1 mat.Dense
+	check_1.Mul(pca.Result.ColView(0), (&V).ColView(0).T())
+	fmt.Println(check_1)
+	var check_2 mat.Dense
+	check_2.Mul(pca.Result.ColView(1), (&V).ColView(1).T())
+	fmt.Println(check_2)
+	var check_ful mat.Dense
+	check_ful.Mul(pca.Result, (&V).T())
+	fmt.Println(check_ful)
 	return
 }
 

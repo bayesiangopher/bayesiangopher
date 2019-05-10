@@ -143,7 +143,7 @@ if __name__ == "__main__":
     # PCA_tiny.check(data, Xnew, mean_matrix, eigenvecs[:, 1])
     #
     from sklearn.decomposition import PCA
-    pca = PCA(n_components=1)
+    pca = PCA(n_components=2)
     Xnew_sklearn = pca.fit_transform(np.transpose(data))
     #
     # print(f"Our result:\n {Xnew}")
