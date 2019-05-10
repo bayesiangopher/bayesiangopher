@@ -3,8 +3,9 @@ package linear
 import (
 	"errors"
 	"fmt"
-	"gonum.org/v1/gonum/mat"
 	"github.com/bayesiangopher/bayesiangopher/core"
+	"gonum.org/v1/gonum/mat"
+	"log"
 )
 
 var (
@@ -32,15 +33,15 @@ type LR struct {
 }
 
 // Fit train to LR
-func (lr *LR) Fit(train *[]Row, targetColumn int, method LRtype) (err error) {
+func (lr *LR) Fit(train core.Train, targetColumn int, method LRtype) (err error) {
 	// Prepare structure and
 	// Prepare data:
 	lr.method = method
-	lr.regressors = mat.NewDense(len(*train), (*train)[0].elements - 1, nil)
+	lr.regressors = mat.NewDense(len(*train), (*train)[0].Elements - 1, nil)
 	fmt.Println(lr.regressors.Dims())
 	lr.regressand = mat.NewVecDense(len(*train), nil)
 	for index, row := range *train {
-		for idx, element := range row.data {
+		for idx, element := range row.Data {
 			if idx == targetColumn {
 				lr.regressand.SetVec(index, element)
 			} else {
@@ -55,13 +56,12 @@ func (lr *LR) Fit(train *[]Row, targetColumn int, method LRtype) (err error) {
 		lr.parameterVector = qrRegressionSolver(lr.regressors, lr.regressand)
 	case method&SVD != 0:
 		lr.parameterVector, err = svdRegressionSolver(lr.regressors, lr.regressand)
-		if err != nil { return FittingError }
+		if err != nil { log.Fatal(err) }
 	}
 	return nil
 }
 
 func qrRegressionSolver(A *mat.Dense, y *mat.VecDense) (b *mat.VecDense){
-	fmt.Println("START LINEAR REGRESSION COMPUTING THROW QR.")
 	_, c := A.Dims()
 	b = mat.NewVecDense(c, nil)
 	// QR decomposition is often used to solve the linear least squares problem
@@ -84,7 +84,6 @@ func qrRegressionSolver(A *mat.Dense, y *mat.VecDense) (b *mat.VecDense){
 }
 
 func svdRegressionSolver(A *mat.Dense, y *mat.VecDense) (b *mat.VecDense, err error) {
-	fmt.Println("START LINEAR REGRESSION COMPUTING THROW SVD.")
 	r, c := A.Dims()
 	b = mat.NewVecDense(c, nil)
 	// SVD decomposition is often used to solve the linear least squares problem

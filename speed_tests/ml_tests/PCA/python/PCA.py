@@ -126,32 +126,32 @@ class PCA:
 
 if __name__ == "__main__":
     PCA_tiny = PCA()
-    data = PCA_tiny.create_date()
-    # data_1 = np.array([
-    #     1., 2., 3., 4., 5., 6., 7., 8., 9., 10.
-    # ]),
-    # data_2 = np.array([
-    #     2.73446908, 4.35122722, 7.21132988,
-    #     11.24872601, 9.58103444, 12.09865079,
-    #     13.78706794, 13.85301221, 15.29003911, 18.0998018
-    # ])
-    # data = np.vstack((data_1, data_2))
-    # centred_data, mean_matrix = PCA_tiny.moments(data)
+    # data = PCA_tiny.create_date()
+    data_1 = np.array([
+        1., 2., 3., 4., 5., 6., 7., 8., 9., 10.
+    ]),
+    data_2 = np.array([
+        2.73446908, 4.35122722, 7.21132988,
+        11.24872601, 9.58103444, 12.09865079,
+        13.78706794, 13.85301221, 15.29003911, 18.0998018
+    ])
+    data = np.vstack((data_1, data_2))
+    centred_data, mean_matrix = PCA_tiny.moments(data)
     # cov_mat = PCA_tiny.covariance_matrix(data)
     # eigenvals, eigenvecs = PCA_tiny.eigens(cov_mat)
     # Xnew = PCA_tiny.projection(cov_mat, centred_data)
     # PCA_tiny.check(data, Xnew, mean_matrix, eigenvecs[:, 1])
     #
-    # from sklearn.decomposition import PCA
-    # pca = PCA(n_components=1)
-    # Xnew_sklearn = pca.fit_transform(np.transpose(data))
+    from sklearn.decomposition import PCA
+    pca = PCA(n_components=1)
+    Xnew_sklearn = pca.fit_transform(np.transpose(data))
     #
     # print(f"Our result:\n {Xnew}")
-    # print(f"Sklearn result:\n {Xnew_sklearn}")
+    print(f"Sklearn result:\n {Xnew_sklearn}")
 
-    Xnew = pca_func(data, 1)
-    print(f"Func result:\n {Xnew}")
-
-    Xnew = pca_func(data, 1)
-    print(f"Func result:\n {Xnew}")
+    # Xnew = pca_func(data, 1)
+    # print(f"Func result:\n {Xnew}")
+    #
+    # Xnew = pca_func(data, 1)
+    # print(f"Func result:\n {Xnew}")
 
