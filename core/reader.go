@@ -13,8 +13,8 @@ type Reader interface {
 }
 
 type CSVReader struct {
-	rows int
-	data []Row
+	Rows int
+	Data []Row
 }
 
 // read data from csv file to CSVReader instance
@@ -22,7 +22,7 @@ func (r *CSVReader) read(path string) {
 	source, _ := os.Open(path)
 	defer source.Close()
 	for row := range rowsProcessing(source) {
-		r.data = append(r.data, Row{data: row, elements: len(row)})
+		r.Data = append(r.Data, Row{Data: row, Elements: len(row)})
 	}
 }
 

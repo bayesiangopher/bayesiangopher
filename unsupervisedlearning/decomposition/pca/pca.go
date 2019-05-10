@@ -15,12 +15,12 @@ type PCA struct{
 	SVD				*mat.SVD
 }
 
-func (pca *PCA) Fit(train *[]Row, components int) (err error) {
+func (pca *PCA) Fit(train *[]core.Row, components int) (err error) {
 	// Create matrix from train
-	M := MakeMatrixFromTrain(train)
+	M := core.MakeMatrixFromTrain(train)
 	r, c := M.Dims()
 	// Mean for centralization of data
-	v := mat.NewVecDense(train[0].elements, nil)
+	v := mat.NewVecDense((*train)[0].elements, nil)
 	for i := 0; i < c; i++ {
 		col := mat.Col(nil, i, M)
 		mean := stat.Mean(col, nil)
