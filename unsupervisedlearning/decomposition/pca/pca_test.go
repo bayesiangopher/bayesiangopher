@@ -2,9 +2,9 @@ package pca
 
 import (
 	"fmt"
+	"github.com/bayesiangopher/bayesiangopher/core"
 	"log"
 	"testing"
-	"github.com/bayesiangopher/bayesiangopher/core"
 )
 
 // TestReadDataFromCSV

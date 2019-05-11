@@ -97,6 +97,7 @@ func matPrint(A mat.Matrix) {
 }
 
 // sumOfIndices return sum of two indices
+// for Apply method of matrices
 func sumOfIndices(i, j int, v float64) float64 {
 	return float64(i + j)
 }

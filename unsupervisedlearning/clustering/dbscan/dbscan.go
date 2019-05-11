@@ -1,86 +1,120 @@
-// https://nabr.com/post/322034/ - base information
-
 package dbscan
 
-const (
-	NOISE		= false
-	CLUSTERED	= true
+import (
+	"github.com/bayesiangopher/bayesiangopher/core"
+	"gonum.org/v1/gonum/mat"
 )
 
-type Clusterable interface {
-	Distance(c interface{}) float64
-	GetID() string
+// НУ ОЧЕНЬ НЕОЧЕНЬ РЕАЛИЗОВАЛ, Я ЗНАЮ, Я КАЮСЬ, Я ИСПРАВЛЮСЬ,
+// ДА ПРОСТИТ МЕНЯ БОГ ОПЕНСОРСА.
+type DBSCAN struct{
+	M				*mat.Dense
+	minNeighbors 	int
+	eps 			float64
+	LabeledTrain	[][]mat.VecDense
+	Noise			[]mat.VecDense
+	visitedPoints 	[]mat.VecDense
+	clusteredPoints	[]mat.VecDense
+	Labels			[]int
+	LabelsCount		int
 }
 
-type Cluster []Clusterable
-
-func Clusterize(objects []Clusterable, minPts int, eps float64) []Cluster {
-	clusters	:= make([]Cluster, 0)
-	visited 	:= map[string]bool{}
-	for _, point := range objects {
-		neighbours := findNeighbours(point, objects, eps)
-		if len(neighbours) + 1 >= minPts {
-			visited[point.GetID()] = CLUSTERED
-			cluster := make(Cluster, 1)
-			cluster[0] = point
-			cluster = expandCluster(cluster, neighbours, visited, minPts, eps)
-			if len(cluster) >= minPts {
-				cluster = append(clusters, cluster)
-			}
+func (dbscan *DBSCAN) Fit(train core.Train, eps float64, minNeighbors int) {
+	dbscan.M = core.MakeMatrixFromTrain(train)
+	r, _ := dbscan.M.Dims()
+	dbscan.minNeighbors = minNeighbors
+	dbscan.eps = eps
+	for i := 0; i < r; i++ {
+		v := mat.NewVecDense(dbscan.M.RowView(i).Len(), nil)
+		v.CopyVec(dbscan.M.RowView(i))
+		if _, in := checkIn(v, &dbscan.visitedPoints); in { continue }
+		dbscan.visitedPoints = append(dbscan.visitedPoints, *v)
+		neighbors := region(v, dbscan.M, dbscan.eps)
+		if len(*neighbors) < minNeighbors {
+			dbscan.Noise = append(dbscan.Noise, *v)
 		} else {
-			visited[point.GetID()] = NOISE
+			dbscan.Labels = append(dbscan.Labels, len(dbscan.Labels) + 1)
+			extendCluster(v, neighbors, dbscan)
 		}
 	}
-	return clusters
 }
 
-func findNeighbours(point Clusterable, points []Clusterable, eps float64) []Clusterable {
-	neighbours := make([]Clusterable, 0)
-	for _, potNeigb := range points {
-		if point.GetID() != potNeigb.GetID() && potNeigb.Distance(point) <= eps {
-			neighbours = append(neighbours, potNeigb)
+func region(vec *mat.VecDense, M *mat.Dense, eps float64) *[]mat.VecDense {
+	var neighbors []mat.VecDense
+	r, _ := M.Dims()
+	for i := 0; i < r; i++ {
+		vTemp := mat.NewVecDense(M.RowView(0).Len(), nil)
+		vTemp.CopyVec(M.RowView(i))
+		if dist := core.VecEuclidean(vec, vTemp); dist < eps && dist > 1e-8 {
+			neighbors = append(neighbors, *vTemp)
 		}
 	}
-	return neighbours
+	return &neighbors
 }
 
-func expandCluster(cluster Cluster, neighbours []Clusterable, 
-			visited map[string]bool, minPts int, eps float64) Cluster {
-	seed := make([]Clusterable, len(neighbours))
-	copy(seed, neighbours)
-	for _, point := range seed {
-		pointState, isVisited := visited[point.GetID()]
-		if !isVisited {
-			currentNeighbours := findNeighbours(point, seed, eps)
-			if len(currentNeighbours)+1 >= minPts {
-				visited[point.GetID()] = CLUSTERED
-				cluster = merge(cluster, currentNeighbours)
+func extendCluster(v *mat.VecDense, neighbors *[]mat.VecDense, dbscan *DBSCAN) {
+	var temp []mat.VecDense
+	dbscan.LabeledTrain = append(dbscan.LabeledTrain, temp)
+	lastCluster := len(dbscan.LabeledTrain) - 1
+	dbscan.clusteredPoints = append(dbscan.clusteredPoints, *v)
+	while := len(*neighbors)
+	for while > 0 {
+		while -= 1
+		u := mat.NewVecDense((*neighbors)[len(*neighbors)-1].Len(), nil)
+		u.CopyVec(&(*neighbors)[len(*neighbors)-1])
+		neighbors = remove(neighbors, len(*neighbors)-1)
+		if _, in := checkIn(u, &dbscan.visitedPoints); !in {
+			dbscan.visitedPoints = append(dbscan.visitedPoints, *u)
+			subNeighbors := region(u, dbscan.M, dbscan.eps)
+			if len(*subNeighbors) > dbscan.minNeighbors {
+				neighbors = extend(neighbors, subNeighbors)
+				while = len(*neighbors)
 			}
 		}
-
-		if isVisited && pointState == NOISE {
-			visited[point.GetID()] = CLUSTERED
-			cluster = append(cluster, point)
+		if _, in := checkIn(u, &dbscan.clusteredPoints); !in {
+			dbscan.clusteredPoints = append(dbscan.clusteredPoints, *u)
+			dbscan.LabeledTrain[lastCluster] = append(dbscan.LabeledTrain[lastCluster], *u)
+			if i, in := checkIn(u, &dbscan.Noise); in {
+				remove(&dbscan.Noise, i)
+			}
 		}
 	}
-
-	return cluster
 }
 
-func merge(one []Clusterable, two []Clusterable) []Clusterable {
-	mergeMap := make(map[string]Clusterable)
-	putAll(mergeMap, one)
-	putAll(mergeMap, two)
-	merged := make([]Clusterable, 0)
-	for _, val := range mergeMap {
-		merged = append(merged, val)
+func extend(v, u *[]mat.VecDense) *[]mat.VecDense {
+	w := make([]mat.VecDense, len(*v) + len(*u))
+	for i := 0; i < len(*v); i++ {
+		w[i] = (*v)[i]
 	}
-
-	return merged
+	offset := len(*v)
+	for i := 0; i < len(*u); i++ {
+		w[offset + i] = (*u)[i]
+	}
+	return &w
 }
 
-func putAll(m map[string]Clusterable, list []Clusterable) {
-	for _, val := range list {
-		m[val.GetID()] = val
+func remove(checkTarget *[]mat.VecDense, i int) *[]mat.VecDense {
+	u := make([]mat.VecDense, len(*checkTarget) - 1)
+	for k := 0; k < len(*checkTarget); k++ {
+		if k == i { continue }
+		if k > i { u[k - 1] = (*checkTarget)[k] }
+		u[k] = (*checkTarget)[k]
 	}
+	return &u
+}
+
+func checkIn(v *mat.VecDense, checkTarget *[]mat.VecDense) (int, bool) {
+	if checkTarget == nil { return 0, false }
+	for i := 0; i < len(*checkTarget); i++ {
+		var check int
+		for j := 0; j <= v.Len(); j++ {
+			if check == v.Len() { return i, true }
+			if v.AtVec(j) != (*checkTarget)[i].AtVec(j) || j == v.Len() {
+				break
+			} else {
+				check += 1
+			}
+		}
+	}
+	return 0, false
 }
