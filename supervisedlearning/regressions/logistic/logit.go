@@ -1,153 +1,202 @@
 package logit
 
 import (
+	"errors"
 	"math"
+	"math/rand"
+
+	"github.com/bayesiangopher/bayesiangopher/core"
+	"gonum.org/v1/gonum/mat"
 )
 
-//put to utils/matrix and use {}interfaces for dot product like:
-// mat*vec; vec.T*mat; vec.T*vec.
-//Also add dimension check
-//Or just base all mat operations on gonum
-//Dot product NxM * Mx1
-func dot(a [][]float64, b []float64) []float64 {
-	c := make([]float64, len(b))
-	for i, v := range a {
-		var sum float64
-		for j := range v {
-			sum += b[j] * a[i][j]
-		}
-		c[i] = sum
-	}
-	return c
+var (
+	BatchSizeInputError = errors.New("Batch size exceeds the size of data")
+	// SVDResultComputeError = errors.New("вектор b посчитан неправильно")
+	// FittingError          = errors.New("ошибка обучения")
+)
+
+type LGRsolver int
+
+const (
+	// Gradient Descending solver
+	GD LGRsolver = 1 << iota
+	// Stochastic Gradient Descending solver
+	SGD
+)
+
+type LGR struct {
+	bias        *mat.VecDense //bias; default: random vetor
+	lrate       float64       //learning rate
+	iter        int           //number of iteration
+	batchs      int           //batch size
+	weights     *mat.VecDense
+	solver      LGRsolver //solving method: GD, SGD
+	multi_class bool
+	res         *mat.Dense
 }
 
-//also as matrix method
-func exp(a []float64) []float64 {
-	b := make([]float64, len(a))
-	for i, v := range a {
-		b[i] = math.Exp(v)
-	}
-	return b
-}
-
-func logn(a []float64) []float64 {
-	b := make([]float64, len(a))
-	for i, v := range a {
-		b[i] = math.Log(v)
-	}
-	return b
-}
-
-func mul(a []float64, s float64) []float64 {
-	b := make([]float64, len(a))
-	for i, v := range a {
-		b[i] = v * s
-	}
-	return b
-}
-
-func plus(a []float64, s float64) []float64 {
-	b := make([]float64, len(a))
-	for i, v := range a {
-		b[i] = v + s
-	}
-	return b
-}
-
-//RETURN EVERY WHERE
-//interface here
-func plusvec(a []float64, b []float64) []float64 {
-	c := make([]float64, len(a))
-	for i, v := range a {
-		c[i] = v + b[i]
-	}
-	return c
-}
-
-func divide(a []float64, s float64) []float64 {
-	b := make([]float64, len(a))
-	for i, v := range a {
-		b[i] = s / v
-	}
-	return b
-}
-
-func mulvec(a, b []float64) []float64 {
-	c := make([]float64, len(a))
-	for i, v := range a {
-		c[i] = v * b[i]
-	}
-	return c
-}
-
-func transpose(a [][]float64) [][]float64 {
-	b := make([][]float64, len(a[0]))
-	for i := range b {
-		b[i] = make([]float64, len(a))
-	}
-	for i, v := range a {
-		for j, r := range v {
-			b[j][i] = r
+func (lgr *LGR) Fit(train core.Train, targetColumn int) (err error) {
+	// Prepare data:
+	x_train := mat.NewDense(len(*train), (*train)[0].Elements-1, nil)
+	y_train := mat.NewVecDense(len(*train), nil)
+	for index, row := range *train {
+		for idx, elem := range row.Data {
+			if idx == targetColumn {
+				y_train.SetVec(index, elem)
+			} else {
+				if idx > targetColumn {
+					idx -= 1
+				}
+				x_train.Set(index, idx, elem)
+			}
 		}
 	}
-	return b
+
+	xrn, xcn := x_train.Dims()
+	//Set optinal parametrs
+	if lgr.bias == nil {
+		rbias := make([]float64, xrn)
+		for i := range rbias {
+			rbias[i] = rand.NormFloat64()
+		}
+		lgr.bias = mat.NewVecDense(len(rbias), rbias)
+	}
+	if lgr.lrate == 0.0 {
+		lgr.lrate = 0.01
+	}
+	if lgr.iter == 0 {
+		lgr.iter = 10000
+	}
+	if lgr.batchs == 0 {
+		lgr.batchs = int(math.Round(float64(xrn) / 5.0))
+	} else if lgr.batchs >= xrn {
+		return BatchSizeInputError
+	}
+	if lgr.weights == nil {
+		rweights := make([]float64, xcn)
+		for i := range rweights {
+			rweights[i] = rand.NormFloat64()
+		}
+		lgr.weights = mat.NewVecDense(len(rweights), rweights)
+	}
+
+	switch {
+	case lgr.solver&GD != 0:
+		gdSolver(x_train, y_train, lgr.weights, lgr.bias, lgr.lrate, lgr.iter)
+	case lgr.solver&SGD != 0:
+		sgdSolver(x_train, y_train, lgr.weights, lgr.bias, lgr.lrate, lgr.iter, lgr.batchs)
+	default:
+		sgdSolver(x_train, y_train, lgr.weights, lgr.bias, lgr.lrate, lgr.iter, lgr.batchs)
+
+	}
+	return nil
 }
 
-// func transpose(a [][]float64) [][]float64 {
-// 	b := make([][]float64, len(a[0]))
-// 	for i, v := range a {
-// 		vec := make([]float64, len(v))
-// 		for j := range v {
-// 			b
-// 		}
+func (lgr *LGR) Predict(train core.Train, w *mat.VecDense) {
+	b := mat.NewVecDense(len(*train), nil)
+
+	x_test := mat.NewDense(len(*train), (*train)[0].Elements-1, nil)
+	for index, row := range *train {
+		for idx, elem := range row.Data {
+			if idx != 0 {
+				if idx > 0 {
+					idx -= 1
+				}
+				x_test.Set(index, idx, elem)
+			}
+		}
+	}
+
+	lgr.res = mat.NewDense(len(*train), 1, nil)
+	sigmoid(x_test, w, b, lgr.res)
+}
+
+func gdSolver(X *mat.Dense, y *mat.VecDense, w *mat.VecDense, b *mat.VecDense, lr float64, iter int) {
+	h := mat.NewDense(y.Len(), 1, nil)
+	grad := mat.NewVecDense(w.Len(), nil)
+	for i := 0; i < iter; i++ {
+		sigmoid(X, w, b, h)
+		subg := mat.NewVecDense(y.Len(), nil)
+		subg.SubVec(y, h.ColView(0))
+		grad.MulVec(X.T(), subg)
+		grad.ScaleVec(1/(float64)(y.Len()), grad)
+		grad.ScaleVec(-lr, grad)
+		w.SubVec(grad, w)
+	}
+}
+
+func sgdSolver(X *mat.Dense, y *mat.VecDense, w *mat.VecDense, b *mat.VecDense, lr float64, iter int, batch int) {
+	h := mat.NewDense(batch, 1, nil)
+	grad := mat.NewVecDense(w.Len(), nil)
+	epoch := int(math.Round(float64(y.Len()) / float64(batch)))
+	for i := 0; i < iter; i++ {
+		for j := 0; j < epoch; j++ {
+			rnd_idx := rand.Intn(y.Len() - batch)
+			xb := X.Slice(rnd_idx, rnd_idx+batch, 0, w.Len())
+			Xb := mat.DenseCopyOf(xb)
+			y_b := y.SliceVec(rnd_idx, rnd_idx+batch)
+			yb := mat.VecDenseCopyOf(y_b)
+			bias_b := y.SliceVec(rnd_idx, rnd_idx+batch)
+			bias := mat.VecDenseCopyOf(bias_b)
+			sigmoid(Xb, w, bias, h)
+			subg := mat.NewVecDense(yb.Len(), nil)
+			subg.SubVec(yb, h.ColView(0))
+			grad.MulVec(Xb.T(), subg)
+			grad.ScaleVec(1/(float64)(yb.Len()), grad)
+			grad.ScaleVec(-lr, grad)
+			w.SubVec(grad, w)
+		}
+	}
+}
+
+func sigmoid(X *mat.Dense, w *mat.VecDense, b *mat.VecDense, h *mat.Dense) {
+	sigm := func(_, _ int, v float64) float64 { return math.Exp(v) / (1 + math.Exp(v)) }
+	xrn, _ := X.Dims()
+	prod := mat.NewVecDense(xrn, nil)
+	prod.MulVec(X, w)
+	prod.AddVec(prod, b)
+	h.Apply(sigm, prod)
+}
+
+// func mean(a []float64) float64 {
+// 	var m float64
+// 	for _, v := range a {
+// 		m += v
 // 	}
+// 	return m
 // }
 
-func sigm(x [][]float64, w, b []float64) []float64 {
-	z := dot(x, w)
-	//all this crap on C?
-	return divide(plus(exp(mul(plusvec(z, b), -1)), 1), 1)
-}
+// func loss(h, y []float64) float64 {
+// 	return mean(plusvec(mulvec(mul(y, -1), logn(h)), mulvec(plus(y, 1), logn(plus(mul(h, -1), 1)))))
+// }
 
-func mean(a []float64) float64 {
-	var m float64
-	for _, v := range a {
-		m += v
-	}
-	return m
-}
+// //grad_asce next commit
+// func grad_desc(x [][]float64, h, y []float64) []float64 {
+// 	return dot(transpose(x), mul(plusvec(h, mul(y, -1)), 1/float64(len(y))))
+// }
 
-func loss(h, y []float64) float64 {
-	return mean(plusvec(mulvec(mul(y, -1), logn(h)), mulvec(plus(y, 1), logn(plus(mul(h, -1), 1)))))
-}
+// func update_weight_loss(w, grad []float64, lr float64) []float64 {
+// 	return plusvec(w, mul(grad, -lr))
+// }
 
-//grad_asce next commit
-func grad_desc(x [][]float64, h, y []float64) []float64 {
-	return dot(transpose(x), mul(plusvec(h, mul(y, -1)), 1/float64(len(y))))
-}
+// func fit(x [][]float64, y, w, b []float64, lr float64, iter int) []float64 {
+// 	for i := 0; i < iter; i++ {
+// 		h := sigm(x, w, b)
+// 		grad := grad_desc(x, h, y)
+// 		w = update_weight_loss(w, grad, lr)
+// 	}
+// 	return w
+// }
 
-func update_weight_loss(w, grad []float64, lr float64) []float64 {
-	return plusvec(w, mul(grad, -lr))
-}
-
-func fit(x [][]float64, y, w, b []float64, lr float64, iter int) []float64 {
-	for i := 0; i < iter; i++ {
-		h := sigm(x, w, b)
-		grad := grad_desc(x, h, y)
-		w = update_weight_loss(w, grad, lr)
-	}
-	return w
-}
-
-func predict(x [][]float64, w []float64) []float64 {
-	b := make([]float64, len(w))
-	w = sigm(x, w, b)
-	for i, v := range w {
-		if v >= 0.5 {
-			b[i] = 1
-		} else {
-			b[i] = 0
-		}
-	}
-	return b
-}
+// func predict(x [][]float64, w []float64) []float64 {
+// 	b := make([]float64, len(w))
+// 	w = sigm(x, w, b)
+// 	for i, v := range w {
+// 		if v >= 0.5 {
+// 			b[i] = 1
+// 		} else {
+// 			b[i] = 0
+// 		}
+// 	}
+// 	return b
+// }
