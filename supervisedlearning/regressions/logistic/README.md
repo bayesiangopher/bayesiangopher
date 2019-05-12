@@ -1,1 +1,0 @@
-# OvR logistic regression algorithm

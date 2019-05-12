@@ -1,1 +1,0 @@
-# IC3 tree algorithm
