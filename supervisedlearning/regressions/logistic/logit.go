@@ -11,8 +11,6 @@ import (
 
 var (
 	BatchSizeInputError = errors.New("Batch size exceeds the size of data")
-	// SVDResultComputeError = errors.New("вектор b посчитан неправильно")
-	// FittingError          = errors.New("ошибка обучения")
 )
 
 type LGRsolver int
@@ -157,46 +155,3 @@ func sigmoid(X *mat.Dense, w *mat.VecDense, b *mat.VecDense, h *mat.Dense) {
 	prod.AddVec(prod, b)
 	h.Apply(sigm, prod)
 }
-
-// func mean(a []float64) float64 {
-// 	var m float64
-// 	for _, v := range a {
-// 		m += v
-// 	}
-// 	return m
-// }
-
-// func loss(h, y []float64) float64 {
-// 	return mean(plusvec(mulvec(mul(y, -1), logn(h)), mulvec(plus(y, 1), logn(plus(mul(h, -1), 1)))))
-// }
-
-// //grad_asce next commit
-// func grad_desc(x [][]float64, h, y []float64) []float64 {
-// 	return dot(transpose(x), mul(plusvec(h, mul(y, -1)), 1/float64(len(y))))
-// }
-
-// func update_weight_loss(w, grad []float64, lr float64) []float64 {
-// 	return plusvec(w, mul(grad, -lr))
-// }
-
-// func fit(x [][]float64, y, w, b []float64, lr float64, iter int) []float64 {
-// 	for i := 0; i < iter; i++ {
-// 		h := sigm(x, w, b)
-// 		grad := grad_desc(x, h, y)
-// 		w = update_weight_loss(w, grad, lr)
-// 	}
-// 	return w
-// }
-
-// func predict(x [][]float64, w []float64) []float64 {
-// 	b := make([]float64, len(w))
-// 	w = sigm(x, w, b)
-// 	for i, v := range w {
-// 		if v >= 0.5 {
-// 			b[i] = 1
-// 		} else {
-// 			b[i] = 0
-// 		}
-// 	}
-// 	return b
-// }
