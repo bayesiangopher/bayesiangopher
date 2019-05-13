@@ -38,7 +38,6 @@ func (lr *LR) Fit(train core.Train, targetColumn int, method LRtype) (err error)
 	// Prepare data:
 	lr.method = method
 	lr.regressors = mat.NewDense(len(*train), (*train)[0].Elements - 1, nil)
-	fmt.Println(lr.regressors.Dims())
 	lr.regressand = mat.NewVecDense(len(*train), nil)
 	for index, row := range *train {
 		for idx, element := range row.Data {
@@ -103,6 +102,7 @@ func svdRegressionSolver(A *mat.Dense, y *mat.VecDense) (b *mat.VecDense, err er
 		D.Set(idx, idx, 1 / element)
 	}
 	// Now find b:
+	fmt.Println("here")
 	var Vt, DVt, UDVt mat.Dense
 	Vt.Clone(V.T())
 	DVt.Mul(D, &Vt)

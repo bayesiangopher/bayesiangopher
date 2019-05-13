@@ -1,22 +1,9 @@
-# Testing speed of operations
-# For every size from: (1024, 16384, 65536, 262144, 524288):
-# - create random matrices [0;100);
-# - scale matrix;
-# - transposing of matrix;
-# - addition of matrices;
-# - subtract of matrices;
-# - dot of matrices;
-# - determinant of matrix;
-# - eigens of matrix;
-# - SVD decomposition of matrix;
-# - Cholesky decomposition of matrix.
-
 import numpy as np
 from numpy import linalg as LA
 from common import *
 
 
-@timer(count=count)
+@timer(cnt=count)
 def create_random_matrix(shape: tuple) -> np.ndarray:
     """
     Создает матрицу с рандомными элементами [0;100)
@@ -28,7 +15,7 @@ def create_random_matrix(shape: tuple) -> np.ndarray:
     return np.random.rand(shape[0]*shape[1]).reshape(shape[0], shape[1]) * 100
 
 
-@timer(count=count)
+@timer(cnt=count)
 def scale_matrix(a: np.ndarray, alpha: float):
     """
     Масштабирует переданную матрицу на alpha.
@@ -39,7 +26,7 @@ def scale_matrix(a: np.ndarray, alpha: float):
     a * alpha
 
 
-@timer(count=count)
+@timer(cnt=count)
 def transpose_matrix(a: np.ndarray) -> np.ndarray:
     """
     Транспонирует переданную матрицу.
@@ -51,7 +38,7 @@ def transpose_matrix(a: np.ndarray) -> np.ndarray:
     return a.transpose()
 
 
-@timer(count=count)
+@timer(cnt=count)
 def addition_of_matrices(a: np.ndarray, b: np.ndarray) -> np.ndarray:
     """
     Считает сумму двух матриц.
@@ -64,7 +51,7 @@ def addition_of_matrices(a: np.ndarray, b: np.ndarray) -> np.ndarray:
     return np.add(a, b)
 
 
-@timer(count=count)
+@timer(cnt=count)
 def subtract_of_matrices(a: np.ndarray, b: np.ndarray) -> np.ndarray:
     """
     Считает разницу двух векторов.
@@ -77,7 +64,7 @@ def subtract_of_matrices(a: np.ndarray, b: np.ndarray) -> np.ndarray:
     return np.subtract(a, b)
 
 
-@timer(count=count)
+@timer(cnt=count)
 def dot_of_matrices(a: np.ndarray, b: np.ndarray) -> np.ndarray:
     """
     Считает произведение двух векторов.
@@ -90,7 +77,7 @@ def dot_of_matrices(a: np.ndarray, b: np.ndarray) -> np.ndarray:
     return np.dot(a, b)
 
 
-@timer(count=count)
+@timer(cnt=count)
 def determinant_of_matrix(a: np.ndarray) -> float:
     """
     Считает детерминант для переданной матрицы.
@@ -102,7 +89,7 @@ def determinant_of_matrix(a: np.ndarray) -> float:
     return LA.det(a)
 
 
-@timer(count=count)
+@timer(cnt=count)
 def eigens_of_matrix(a: np.ndarray) -> (np.ndarray, np.ndarray):
     """
     Находит собственные числа и правые собственные вектора.
@@ -115,7 +102,7 @@ def eigens_of_matrix(a: np.ndarray) -> (np.ndarray, np.ndarray):
     return LA.eig(a)
 
 
-@timer(count=count)
+@timer(cnt=count)
 def SVD_of_matrix(a: np.ndarray) -> (np.ndarray, np.diag, np.ndarray):
     """
     Находит элементы SVD разложения матрицы a.
@@ -127,7 +114,7 @@ def SVD_of_matrix(a: np.ndarray) -> (np.ndarray, np.diag, np.ndarray):
     return LA.svd(a)
 
 
-@timer(count=count)
+@timer(cnt=count)
 def cholesky_of_matrix(a: np.ndarray) -> np.ndarray:
     """
     Находит разложение Холецкого для переданной эрмитовой

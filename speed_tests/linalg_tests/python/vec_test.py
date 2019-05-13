@@ -1,3 +1,17 @@
+# Тестирование работы библиотеки numpy с векторами
+# For every size from: (1024, 16384, 65536, 131072, 262144, 524288):
+# 1 - create random vectors [0;100);
+# 2 - scale vector;
+# 3 - Frobenius norm of vector;
+# 4 - addition of vectors;
+# 5 - subtract of vectors;
+# 6 - dot of vectors.
+
+# Для использования:
+# - pip3 install -r requirements.txt
+# - раскомментить нужные тесты.
+
+
 from vec import *
 from common import *
 
@@ -108,7 +122,7 @@ def dot_of_vectors_set():
 
 if __name__ == '__main__':
     # create_random_vector_set()
-    scale_vector_set()
+    # scale_vector_set()
     # frobenius_norm_of_vector_set()
     # addition_of_vectors_set()
     # subtract_of_vectors_set()

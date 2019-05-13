@@ -24,6 +24,12 @@ func scaleMatrix(alpha float64, A *mat.Dense) {
 	A.Scale(alpha, A)
 }
 
+// transposingMatrix return interface Matrix with structure of
+// transposed matrix
+func transposeMatrix(A *mat.Dense) mat.Matrix {
+	return A.T()
+}
+
 // additionOfMatrices return result of addition of two matrices
 func additionOfMatrices(A, B *mat.Dense) (C *mat.Dense) {
 	Rows, Cols := A.Dims()
@@ -38,12 +44,6 @@ func subtractOfMatrices(A, B *mat.Dense) (C *mat.Dense) {
 	C = mat.NewDense(Rows, Cols, nil)
 	C.Sub(A, B)
 	return
-}
-
-// transposingMatrix return interface Matrix with structure of
-// transposed matrix
-func transposeMatrix(A *mat.Dense) mat.Matrix {
-	return A.T()
 }
 
 // dotOfMatrices return dot of matrices
@@ -94,12 +94,6 @@ func choleskyOfMatrix(A *mat.SymDense) (L *mat.TriDense) {
 // matPrint print Matrix to Stdout
 func matPrint(A mat.Matrix) {
 	fmt.Printf("%v\n", mat.Formatted(A, mat.Prefix(" "), mat.Excerpt(3)))
-}
-
-// sumOfIndices return sum of two indices
-// for Apply method of matrices
-func sumOfIndices(i, j int, v float64) float64 {
-	return float64(i + j)
 }
 
 // extractSVD extracts SVD decomposition results

@@ -1,19 +1,9 @@
-# Testing speed of operations
-# For every size from: (1024, 16384, 65536, 131072, 262144, 524288):
-# - create random vectors [0;100);
-# - scale vector;
-# - Frobenius norm of vector;
-# - addition of vectors;
-# - subtract of vectors;
-# - dot of vectors.
-
-
 import numpy as np
 from numpy import linalg as LA
 from common import *
 
 
-@timer(count=count)
+@timer(cnt=count)
 def create_random_vector(n: int) -> np.ndarray:
     """
     Создает вектор с рандомными элементами [0;100)
@@ -25,7 +15,7 @@ def create_random_vector(n: int) -> np.ndarray:
     return np.random.rand(n) * 100
 
 
-@timer(count=count)
+@timer(cnt=count)
 def scale_vector(vec: np.ndarray, alpha: float) -> np.ndarray:
     """
     Масштабирует переданный вектор на alpha.
@@ -36,7 +26,7 @@ def scale_vector(vec: np.ndarray, alpha: float) -> np.ndarray:
     return vec * alpha
 
 
-@timer(count=count)
+@timer(cnt=count)
 def frobenius_norm_of_vector(vec: np.ndarray) -> float:
     """
     Считает норму Фробениуса для переданного вектора.
@@ -48,7 +38,7 @@ def frobenius_norm_of_vector(vec: np.ndarray) -> float:
     return LA.norm(vec)
 
 
-@timer(count=count)
+@timer(cnt=count)
 def addition_of_vectors(vec: np.ndarray, vec_2: np.ndarray) -> np.ndarray:
     """
     Считает сумму двух векторов.
@@ -61,7 +51,7 @@ def addition_of_vectors(vec: np.ndarray, vec_2: np.ndarray) -> np.ndarray:
     return np.add(vec, vec_2)
 
 
-@timer(count=count)
+@timer(cnt=count)
 def subtract_of_vectors(vec: np.ndarray, vec_2: np.ndarray) -> np.ndarray:
     """
     Считает разницу двух векторов.
@@ -74,7 +64,7 @@ def subtract_of_vectors(vec: np.ndarray, vec_2: np.ndarray) -> np.ndarray:
     return np.subtract(vec, vec_2)
 
 
-@timer(count=count)
+@timer(cnt=count)
 def dot_of_vectors(vec: np.ndarray, vec_2: np.ndarray) -> np.ndarray:
     """
     Считает произведение двух векторов.

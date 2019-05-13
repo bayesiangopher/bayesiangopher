@@ -23,6 +23,27 @@ func testCreateRandomMatrixFunc(N, M int) func(t *testing.T) {
 	}
 }
 
+// TestScaleMatrix testing speed and result of work
+// scaleMatrix (gonum: Scale) function
+func TestScaleMatrix(t *testing.T) {
+	A := createRandomMatrix(16, 16)
+	check := A.At(0, 0) * 5.25
+	scaleMatrix(5.25, A)
+	if A.At(0, 0) != check {
+		t.Fatal("Масштабирование матрицы реализовано неправильно.")
+	}
+}
+
+// TestTransposeMatrix testing speed and result of work
+// transposeMatrix (gonum: T) function
+func TestTransposeMatrix(t *testing.T) {
+	A := createRandomMatrix(16, 16)
+	B := transposeMatrix(A)
+	if A.At(2, 3) != B.At(3 , 2) {
+		t.Fatal("Транспонирование матрицы реализовано неправильно.")
+	}
+}
+
 // TestAdditionOfMatrices testing speed and result of work
 // additionOfMatrices (gonum: Add) function
 func TestAdditionOfMatrices(t *testing.T) {
@@ -47,27 +68,6 @@ func TestSubtractOfMatrices(t *testing.T) {
 	}
 }
 
-// TestScaleMatrix testing speed and result of work
-// scaleMatrix (gonum: Scale) function
-func TestScaleMatrix(t *testing.T) {
-	A := createRandomMatrix(16, 16)
-	check := A.At(0, 0) * 5.25
-	scaleMatrix(5.25, A)
-	if A.At(0, 0) != check {
-		t.Fatal("Масштабирование матрицы реализовано неправильно.")
-	}
-}
-
-// TestTransposeMatrix testing speed and result of work
-// transposeMatrix (gonum: T) function
-func TestTransposeMatrix(t *testing.T) {
-	A := createRandomMatrix(16, 16)
-	B := transposeMatrix(A)
-	if A.At(2, 3) != B.At(3 , 2) {
-		t.Fatal("Транспонирование матрицы реализовано неправильно.")
-	}
-}
-
 // TestDotOfMatrices testing speed and result of work
 // dotOfMatrices (gonum: Product) function
 func TestDotOfMatrices(t *testing.T) {
@@ -78,10 +78,6 @@ func TestDotOfMatrices(t *testing.T) {
 	if !almostEqual(check, C.At(0, 0), 1e-8) {
 		t.Fatal("Перемножение матрицы реализовано неправильно.")
 	}
-}
-
-func almostEqual(a, b, eps float64) bool {
-	return math.Abs(a - b) <= eps
 }
 
 // TestDeterminantOfMatrix testing speed and result of work
@@ -160,7 +156,8 @@ func benchCreateRandomMatrixFunc(N, M int) func(b *testing.B) {
 	}
 }
 
-// BenchmarkScaleMatrix testing speed and memory use vector scaling
+// BenchmarkScaleMatrix testing speed and memory use of
+// scaleMatrix function
 func BenchmarkScaleMatrix(b *testing.B) {
 	for key, value := range mapMatTest {
 		b.Run(key, benchScaleMatrixFunc(value[0], value[1], 5.25))
@@ -182,7 +179,8 @@ func benchScaleMatrixFunc(N, M int, alpha float64) func(b *testing.B) {
 	}
 }
 
-// BenchmarkTransposeMatrix testing speed and memory use vector scaling
+// BenchmarkTransposeMatrix testing speed and memory use of
+// transposeMatrix function
 func BenchmarkTransposeMatrix(b *testing.B) {
 	for key, value := range mapMatTest {
 		b.Run(key, benchTransposeMatrixFunc(value[0], value[1]))
@@ -204,7 +202,56 @@ func benchTransposeMatrixFunc(N, M int) func(b *testing.B) {
 	}
 }
 
-// BenchmarkDotOfMatrix testing speed and memory use vector scaling
+// BenchmarkAdditionOfMatrix testing speed and memory use of
+// additionOfMatrices function
+func BenchmarkAdditionOfMatrix(b *testing.B) {
+	for key, value := range mapMatTest {
+		b.Run(key, benchAdditionOfMatrixFunc(value[0], value[1]))
+	}
+}
+
+func benchAdditionOfMatrixFunc(N, M int) func(b *testing.B) {
+	return func(b *testing.B) {
+		A := createRandomMatrix(N, M)
+		B := createRandomMatrix(N, M)
+		b.ReportAllocs()
+		b.N = 10
+		b.ResetTimer()
+		for i := 0; i < b.N; i++ {
+			b.StartTimer()
+			C := additionOfMatrices(A, B)
+			b.StopTimer()
+			_ = C
+		}
+	}
+}
+
+// BenchmarkSubtractOfMatrix testing speed and memory use of
+// subtractOfMatrices function
+func BenchmarkSubtractOfMatrix(b *testing.B) {
+	for key, value := range mapMatTest {
+		b.Run(key, benchSubtractOfMatrixFunc(value[0], value[1]))
+	}
+}
+
+func benchSubtractOfMatrixFunc(N, M int) func(b *testing.B) {
+	return func(b *testing.B) {
+		A := createRandomMatrix(N, M)
+		B := createRandomMatrix(N, M)
+		b.ReportAllocs()
+		b.N = 10
+		b.ResetTimer()
+		for i := 0; i < b.N; i++ {
+			b.StartTimer()
+			C := subtractOfMatrices(A, B)
+			b.StopTimer()
+			_ = C
+		}
+	}
+}
+
+// BenchmarkDotOfMatrix testing speed and memory use of
+// dotOfMatrices function
 func BenchmarkDotOfMatrix(b *testing.B) {
 	for key, value := range mapMatTest {
 		b.Run(key, benchDotOfMatrixFunc(value[0], value[1]))
@@ -227,7 +274,8 @@ func benchDotOfMatrixFunc(N, M int) func(b *testing.B) {
 	}
 }
 
-// BenchmarkDotOfMatrix testing speed and memory use vector scaling
+// BenchmarkDeterminantOfMatrix testing speed and memory use of
+// determinantOfMatrix function
 func BenchmarkDeterminantOfMatrix(b *testing.B) {
 	for key, value := range mapMatTest {
 		b.Run(key, benchDeterminantOfMatrixFunc(value[0], value[1]))
@@ -237,20 +285,20 @@ func BenchmarkDeterminantOfMatrix(b *testing.B) {
 func benchDeterminantOfMatrixFunc(N, M int) func(b *testing.B) {
 	return func(b *testing.B) {
 		A := createRandomMatrix(N, M)
-		B := createRandomMatrix(N, M)
 		b.ReportAllocs()
 		b.N = 10
 		b.ResetTimer()
 		for i := 0; i < b.N; i++ {
 			b.StartTimer()
-			C := dotOfMatrices(A, B)
+			C := determinantOfMatrix(A)
 			b.StopTimer()
 			_ = C
 		}
 	}
 }
 
-// BenchmarkDotOfMatrix testing speed and memory use vector scaling
+// BenchmarkEigensOfMatrix testing speed and memory use of
+// eigensOfMatrix function
 func BenchmarkEigensOfMatrix(b *testing.B) {
 	for key, value := range mapMatTest {
 		b.Run(key, benchEigensOfMatrixFunc(value[0], value[1]))
@@ -272,7 +320,8 @@ func benchEigensOfMatrixFunc(N, M int) func(b *testing.B) {
 	}
 }
 
-// BenchmarkDotOfMatrix testing speed and memory use vector scaling
+// BenchmarkSVDOfMatrix testing speed and memory use of
+// SVDOfMatrix function
 func BenchmarkSVDOfMatrix(b *testing.B) {
 	for key, value := range mapMatTest {
 		b.Run(key, benchSVDOfMatrixFunc(value[0], value[1]))
@@ -294,7 +343,8 @@ func benchSVDOfMatrixFunc(N, M int) func(b *testing.B) {
 	}
 }
 
-// BenchmarkDotOfMatrix testing speed and memory use vector scaling
+// BenchmarkCholeskyOfMatrix testing speed and memory use of
+// choleskyOfMatrix function
 func BenchmarkCholeskyOfMatrix(b *testing.B) {
 	for key, value := range mapMatTest {
 		b.Run(key, benchCholeskyOfMatrixFunc(value[0], value[1]))
@@ -316,4 +366,8 @@ func benchCholeskyOfMatrixFunc(N, M int) func(b *testing.B) {
 			_ = L
 		}
 	}
+}
+
+func almostEqual(a, b, eps float64) bool {
+	return math.Abs(a - b) <= eps
 }

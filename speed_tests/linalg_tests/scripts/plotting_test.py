@@ -1,4 +1,4 @@
-from plotting import *
+from .plotting import *
 
 if __name__ == '__main__':
     parser = create_parser()

@@ -1,3 +1,20 @@
+# Тестирование работы библиотеки numpy с матрицами
+# For every size from: (16384, 65536, 262144, 1048576):
+# 1 - create random matrices [0;100);
+# 2 - scale matrix;
+# 3 - transposing of matrix;
+# 4 - addition of matrices;
+# 5 - subtract of matrices;
+# 6 - dot of matrices;
+# 7 - determinant of matrix;
+# 8 - eigens of matrix;
+# 9 - SVD decomposition of matrix;
+# 10 - Cholesky decomposition of matrix.
+
+# Для использования:
+# - pip3 install -r requirements.txt
+# - раскомментить нужные тесты.
+
 from mat import *
 from common import *
 

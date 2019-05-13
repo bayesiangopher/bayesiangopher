@@ -85,24 +85,18 @@ class Plotter:
         def form_data(self, case, lang):
             size = case[3]
             time = case[4]
-            mem = case[5]
             if not (self.cases.get(time_pattern).get(lang)):
                 self.cases[time_pattern][lang] = [[size], [time]]
-                self.cases[mem_pattern][lang] = [[size], [mem]]
             else:
                 self.cases[time_pattern][lang][0].append(size)
                 self.cases[time_pattern][lang][1].append(time)
-                self.cases[mem_pattern][lang][0].append(size)
-                self.cases[mem_pattern][lang][1].append(mem)
 
         for ds in self.datasets:
             for case in ds[1:]:
                 lang = case[0]
                 time_pattern = f"{case[1]}-{case[2]}-time"
-                mem_pattern = f"{case[1]}-{case[2]}-mem"
                 if not(self.cases.get(time_pattern)):
                     self.cases[time_pattern] = dict()
-                    self.cases[mem_pattern] = dict()
                     form_data(self, case, lang)
                 else:
                     form_data(self, case, lang)
