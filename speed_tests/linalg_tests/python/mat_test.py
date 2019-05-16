@@ -46,7 +46,8 @@ def scale_matrix_set():
         check = a[0][0]
         scaled_a = scale_matrix(a, alpha)
         print(f"Scaled random matrix with size {shape}.\n")
-        print(f"Alpha after scale: {scaled_a[0][0]/check} \n")
+        #FIXME: TypeError: 'NoneType' object is not subscriptable
+        # print(f"Alpha after scale: {scaled_a[0][0]/check} \n")
 
     for shape in dictMatSize.values():
         test(shape)

@@ -62,7 +62,7 @@ def frobenius_norm_of_vector_set():
         print(f"Calculated Frobenius norm of vector with size {shape}.\n")
         print(f"Frobenius norm: {fro} \n")
 
-    for shape in dictVecSize.value():
+    for shape in dictVecSize.values():
         test(shape)
 
 

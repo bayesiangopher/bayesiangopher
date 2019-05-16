@@ -62,10 +62,10 @@ auto dot_v(int n){
 void test(int r, int n, auto (*f)(int)){
     double diff = 0.0;
     for(int i=0; i < r; i++){
-        diff += chrono::duration <double> ((*f)(n)).count();
+        diff += chrono::duration <double, nano> ((*f)(n)).count();
     }
     cout << "\tVector size : " << n << "\tRepeats : " << r << endl;
-    cout << "\tTest duration : " << diff/r << " s" << endl;
+    cout << fixed << "\tTest duration : " << diff/r << " ns" << endl;
 }
 
 int main(int argc, char *argv[]){

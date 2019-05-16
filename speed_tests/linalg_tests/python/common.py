@@ -36,7 +36,7 @@ def timer(cnt):
             for n in range(cnt):
                 value = func(*args, **kwargs)
             end = time.time()
-            runtime = (end - start)/cnt
+            runtime = (10**9)*(end - start)/cnt
             print(f"\nTime of work {func.__name__}({args}): {runtime}\n")
             return value
         # декоратор profile - изменяет расход памяти исполняемым кодом.

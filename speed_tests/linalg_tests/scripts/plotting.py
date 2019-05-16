@@ -19,9 +19,9 @@ def create_parser():
 class TFig(Figure):
 
     cs = dict(
-        golang='b',
+        go='b',
         python='g',
-        c='k'
+        cpp='k'
     )
 
     def __init__(self, *args, fig_title, **kwargs):
@@ -59,7 +59,7 @@ class Plotter:
                 self.data_files.append(f)
         for i, data_set in enumerate(self.data_files):
             with open(data_set, newline='\n') as ds:
-                reader = csv.reader(ds, 'common_csv')
+                reader = csv.reader(ds,  delimiter=',', quoting=csv.QUOTE_NONE)
                 self.datasets.append([])
                 try:
                     for row in reader:
@@ -110,6 +110,7 @@ class Plotter:
             ax.set_ylabel('Memory usage') if "mem" in key else ax.set_ylabel('Time')
             for k, v in value.items():
                 color = TFig.cs.get(k)
-                ax.plot(v[0], v[1], f"{color}o-", label=f"{k}")
+
+                ax.plot([int(x) for x in v[0]], [int(x) for x in v[1]], f"{color}o-", label=f"{k}")
             fig.legend(bbox_to_anchor=(0.3, 0.85), borderaxespad=0.)
             plt.savefig(f"{self.source}/{key}.png")
