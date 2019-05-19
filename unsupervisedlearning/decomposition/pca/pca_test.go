@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/bayesiangopher/bayesiangopher/core"
 	"log"
+	"math"
 	"testing"
 )
 
@@ -40,4 +41,8 @@ func TestFit(t *testing.T) {
 	}
 	fmt.Printf("Result of decomposition: %v \n", pca.Result)
 	_ = pca.Losses()
+}
+
+func TestFit(t *testing.T) {
+	math.Acos()
 }

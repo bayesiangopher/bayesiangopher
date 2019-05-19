@@ -1,6 +1,7 @@
 import numpy as np
 from numpy import linalg as LA
 from common import *
+from sklearn.decomposition import PCA
 
 
 @timer(cnt=count)

@@ -139,7 +139,7 @@ cpp,scale,mat,512,155012
 cpp,scale,mat,1024,904372
 go,trans,mat,32,127
 go,trans,mat,128,127
-go,trans,mat,256,96.9
+go,trans,mat,256,96
 go,trans,mat,512,141
 go,trans,mat,1024,137
 python,trans,mat,32,165939

@@ -1,0 +1,6 @@
+lang,method,trainrows,traincols,time,coef
+python,dbscan,4000,2,60746407,0
+python,linearregression,10000,2,5386781,0.962096
+python,pca,506,14,4770803,0.8045
+python,logisticregression,499,30,29279112,0.842857
+python,kmeans,2499,2,85376787,-110718
