@@ -11,7 +11,6 @@ import (
 var (
 	SVDDecompositionError = errors.New("ошибка во время SVD разложения")
 	SVDResultComputeError = errors.New("вектор b посчитан неправильно")
-	CoefBeforeFitting = errors.New("поиск коэффициентов до фиттинга")
 )
 
 // LRtype specifies the treatment of solving
@@ -33,10 +32,9 @@ type LR struct {
 	targetColumn 	int
 }
 
-// Fit train to LR
-func (lr *LR) Fit(train core.Train, targetColumn int, method LRtype) (err error) {
-	// Prepare structure and
-	// Prepare data:
+// LinearRegression prepare structure and data for fitting
+func LinearRegression(train core.Train, targetColumn int, method LRtype) *LR {
+	lr := LR{}
 	lr.method = method
 	lr.targetColumn = targetColumn
 	lr.regressors = mat.NewDense(len(*train), (*train)[0].Elements - 1, nil)
@@ -51,11 +49,16 @@ func (lr *LR) Fit(train core.Train, targetColumn int, method LRtype) (err error)
 			}
 		}
 	}
+	return &lr
+}
+
+// Fit train to LR
+func (lr *LR) Fit() (err error) {
 	// Make fitting:
 	switch {
-	case method&QR != 0:
+	case lr.method&QR != 0:
 		lr.parameterVector = qrRegressionSolver(lr.regressors, lr.regressand)
-	case method&SVD != 0:
+	case lr.method&SVD != 0:
 		lr.parameterVector, err = svdRegressionSolver(lr.regressors, lr.regressand)
 		if err != nil { log.Fatal(err) }
 	default:
@@ -65,8 +68,18 @@ func (lr *LR) Fit(train core.Train, targetColumn int, method LRtype) (err error)
 	return nil
 }
 
-// Predict does predict
-func (lr *LR) Predict(testTrain core.Train) (predictResult *mat.VecDense) {
+// Predict wrapper for PredictTrain and PredictDense
+func (lr *LR) Predict(testTrainR core.Train, testTrainM *mat.Dense) (predictResult *mat.VecDense) {
+	if testTrainR == nil && testTrainM == nil { log.Fatal("не передано данных") }
+	if testTrainR == nil {
+		return lr.PredictDense(testTrainM)
+	} else {
+		return lr.PredictTrain(testTrainR)
+	}
+}
+
+// Predict does predict by Train
+func (lr *LR) PredictTrain(testTrain core.Train) (predictResult *mat.VecDense) {
 	testTrainMatrix := core.MakeMatrixFromTrain(testTrain)
 	r, c := testTrainMatrix.Dims()
 	predictResult = mat.NewVecDense(r, nil)
@@ -81,27 +94,27 @@ func (lr *LR) Predict(testTrain core.Train) (predictResult *mat.VecDense) {
 	return
 }
 
-// TrainCoef checks result of fitting
-func (lr *LR) TrainCoef() (coef float64) {
-	r, c := lr.regressors.Dims()
-	if lr.parameterVector == nil {
-		panic( CoefBeforeFitting )
-	}
-	coefs := make([]float64, r)
-	var resultCheck float64
+// Predict does predict by Dense
+func (lr *LR) PredictDense(testTrain *mat.Dense) (predictResult *mat.VecDense) {
+	r, c := testTrain.Dims()
+	predictResult = mat.NewVecDense(r, nil)
+	var result float64
 	for i := 0; i < r; i++ {
-		resultCheck = 0
+		result = 0
 		for j := 0; j < c; j++ {
-			resultCheck += lr.regressors.At(i, j) * lr.parameterVector.AtVec(j)
+			result += testTrain.At(i,j) * lr.parameterVector.AtVec(j)
 		}
-		coefs[i] = math.Abs(lr.regressand.AtVec(i) / resultCheck)
+		predictResult.SetVec(i, result)
 	}
-	min, _ := Min(coefs)
-	return min
+	return
 }
 
-// TestCoef checks result of fitting for test train data
-func (lr *LR) TestCoef(testTrain core.Train) (coef float64) {
+// DeterminationCoefficient return coefficient of determination
+func (lr *LR) DeterminationCoefficient(testTrain core.Train) (coef float64) {
+	// The most general definition of the coefficient of determination is:
+	// 1 - SSres/SStot,
+	// SSres - the residual sum of squares;
+	// SStot - the total sum of squares (proportional to the variance of the data).
 	regressors := mat.NewDense(len(*testTrain), (*testTrain)[0].Elements - 1, nil)
 	regressand := mat.NewVecDense(len(*testTrain), nil)
 	for index, row := range *testTrain {
@@ -114,18 +127,22 @@ func (lr *LR) TestCoef(testTrain core.Train) (coef float64) {
 			}
 		}
 	}
-	r, c := regressors.Dims()
-	coefs := make([]float64, r)
-	var resultCheck float64
+	var meanRegresandsValue float64
+	r, _ := regressand.Dims()
 	for i := 0; i < r; i++ {
-		resultCheck = 0
-		for j := 0; j < c; j++ {
-			resultCheck += regressors.At(i, j) * lr.parameterVector.AtVec(j)
-		}
-		coefs[i] = math.Abs(regressand.AtVec(i) / resultCheck)
+		meanRegresandsValue += regressand.AtVec(i)
 	}
-	min, _ := Min(coefs)
-	return min
+	meanRegresandsValue /= float64(r)
+	predictResult := lr.PredictDense(regressors)
+	var SStot float64
+	for i := 0; i < r; i++ {
+		SStot += math.Pow(regressand.AtVec(i) - meanRegresandsValue, 2)
+	}
+	var SSres float64
+	for i := 0; i < r; i++ {
+		SSres += math.Pow(regressand.AtVec(i) - predictResult.AtVec(i), 2)
+	}
+	return 1 - SSres / SStot
 }
 
 func Min(values []float64) (min float64, err error) {

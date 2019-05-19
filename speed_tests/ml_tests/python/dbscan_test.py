@@ -34,6 +34,13 @@ class DataGaner():
     def print_data(self):
         print(self.data[:])
 
+    def save_data_to_csv(self):
+        import csv
+        with open('data.csv', 'w+') as f:
+            csv_writer = csv.writer(f, delimiter=',', quoting=csv.QUOTE_MINIMAL)
+            for row in self.data:
+                csv_writer.writerow(row)
+
     def plot_data(self):
         fig, ax = plt.subplots(figsize=(20, 10))
         ax.use_sticky_edges = False
@@ -91,9 +98,10 @@ def dbscan_test():
         DBSCAN.create_clusters()
         print("Кластеризация выполнена.")
 
-    DBSCAN = DBSCANTester(size=500, type="simple")
+    DBSCAN = DBSCANTester(size=500)
     print(f"Размер обучающей выборки: {DBSCAN.data.shape}")
     test(DBSCAN)
+    DBSCAN.save_data_to_csv()
 
 
 if __name__ == "__main__":
