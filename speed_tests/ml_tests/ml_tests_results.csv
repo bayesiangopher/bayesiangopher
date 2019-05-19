@@ -2,7 +2,7 @@ lang,method,trainrows,traincols,time,coef
 python,dbscan,4000,2,83724093,0
 go,dbscan,4000,2,250567345087,0
 python,linearregression,10000,2,7272005,0.962096
-go,linearregression,10000,2,098570927,0.943758
+go,linearregression,10000,2,198570927,0.943758
 python,pca,506,14,4770803,0.8045
 go,pca,506,14,697774,0.8045
 python,logisticregression,499,30,29279112,0.842857
