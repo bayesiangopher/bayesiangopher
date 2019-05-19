@@ -1,16 +1,16 @@
 package pca
 
 import (
+	"errors"
 	"fmt"
 	"github.com/bayesiangopher/bayesiangopher/core"
 	"log"
-	"math"
 	"testing"
 )
 
 // TestReadDataFromCSV
 func TestReadDataFromCSV(t *testing.T) {
-	r := core.CSVReader{Path: "../../../datasets/the_real_tiny_pca_dataset.csv"}
+	r := core.CSVReader{Path: "../../../datasets/the_boston_housing_dataset.csv"}
 	train := r.Read(true)
 	fmt.Printf("\nFirst line of train: %v.\n", (*train)[0].Data)
 	fmt.Printf("Second line of train: %v.\n", (*train)[1].Data)
@@ -24,25 +24,28 @@ func TestReadDataFromCSV(t *testing.T) {
 
 // TestFit
 func TestFit(t *testing.T) {
-	r := core.CSVReader{Path: "../../../datasets/the_real_tiny_pca_dataset.csv"}
+	r := core.CSVReader{Path: "../../../datasets/the_boston_housing_dataset.csv"}
 	train := r.Read(true)
 	pca := PCA{}
-	pca.Fit(train, 0)
-	if pca.Means.AtVec(0) != 5.5 || pca.Means.AtVec(1) != 10.825535848000001 {
-		log.Fatal("Mistake in means computing.")
-	}
-	fmt.Printf("Mean vector: %v \n", pca.Means)
-	if pca.CentredTrain.At(0,0) != (*train)[0].Data[0] - pca.Means.At(0,0) {
-		log.Fatal("Centring mistake.")
-	}
-	fmt.Printf("Centred data: %v \n", pca.CentredTrain)
-	if pca.Result.At(0, 0) != -9.250319037967504 {
-		log.Fatal("Result mistake.")
-	}
-	fmt.Printf("Result of decomposition: %v \n", pca.Result)
-	_ = pca.Losses()
+	err := pca.Fit(train, 0)
+	if err != nil { log.Fatal(errors.New("ошибка фита")) }
+	fmt.Println(pca.Result)
+
 }
 
-func TestFit(t *testing.T) {
-	math.Acos()
+// BenchmarkLRQR testing speed and memory use of
+// lr.Fit(QR) function
+func BenchmarkFit(b *testing.B) {
+	r := core.CSVReader{Path: "../../../datasets/the_boston_housing_dataset.csv"}
+	train := r.Read(true)
+	pca := PCA{}
+	b.ReportAllocs()
+	b.N = 10
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		b.StartTimer()
+		err := pca.Fit(train, 0)
+		if err != nil { log.Fatal(errors.New("ошибка фита")) }
+		b.StopTimer()
+	}
 }

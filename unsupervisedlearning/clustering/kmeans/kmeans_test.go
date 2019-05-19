@@ -1,7 +1,9 @@
 package kmeans
 
 import (
+	"errors"
 	"fmt"
+	"log"
 	"testing"
 
 	"github.com/bayesiangopher/bayesiangopher/core"
@@ -9,12 +11,19 @@ import (
 
 //Speed of fitting model for Xclara dataset
 func BenchmarkXclaraFitKmeans(b *testing.B) {
-	r := core.CSVReader{Path: "../../../datasets/the_xclara_cluster.csv"}
+	r := core.CSVReader{Path: "../../../datasets/the_xclara_cluster_2.5k_dataset.csv"}
 	train := r.Read(true)
-
 	k := 3
 	kmns := KMNS{}
-	kmns.Fit(train, k)
+	b.ReportAllocs()
+	b.N = 10
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		b.StartTimer()
+		err := kmns.Fit(train, k)
+		if err != nil { log.Fatal(errors.New("ошибка фита")) }
+		b.StopTimer()
+	}
 }
 
 //Speed of fitting model for Iris dataset
@@ -24,7 +33,8 @@ func BenchmarkIrisFitKmeans(b *testing.B) {
 
 	k := 3
 	kmns := KMNS{}
-	kmns.Fit(train, k)
+	err := kmns.Fit(train, k)
+	if err != nil { log.Fatal(errors.New("ошибка фита")) }
 }
 
 //Speed of fitting model and predicting labels for randomly generated blobs
@@ -36,7 +46,8 @@ func BenchmarkRandBlobsFitPredictKmeans(b *testing.B) {
 
 	k := 3
 	kmns := KMNS{}
-	kmns.Fit(train, k)
+	err := kmns.Fit(train, k)
+	if err != nil { log.Fatal(errors.New("ошибка фита")) }
 	fmt.Println(kmns.labels)
 	lbs := kmns.Predict(test)
 	fmt.Println(lbs)
@@ -51,7 +62,8 @@ func TestRandBlobsFitPredictKmeans(t *testing.T) {
 
 	k := 3
 	kmns := KMNS{}
-	kmns.Fit(train, k)
+	err := kmns.Fit(train, k)
+	if err != nil { log.Fatal(errors.New("ошибка фита")) }
 	fmt.Println(kmns.labels)
 	lbs := kmns.Predict(test)
 	fmt.Println(lbs)

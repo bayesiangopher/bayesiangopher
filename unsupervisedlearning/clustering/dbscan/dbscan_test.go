@@ -8,7 +8,7 @@ import (
 
 // TestReadDataFromCSV
 func TestReadDataFromCSV(t *testing.T) {
-	r := core.CSVReader{Path: "../../../datasets/the_real_tiny_dbscan_dataset.csv"}
+	r := core.CSVReader{Path: "../../../datasets/the_dbscan_handmade_dataset.csv"}
 	train := r.Read(true)
 	fmt.Printf("\nFirst line of train: %v.\n", (*train)[0].Data)
 	fmt.Printf("Second line of train: %v.\n", (*train)[1].Data)
@@ -22,10 +22,10 @@ func TestReadDataFromCSV(t *testing.T) {
 
 // TestFit
 func TestFit(t *testing.T) {
-	r := core.CSVReader{Path: "../../../datasets/the_real_tiny_dbscan_dataset.csv"}
+	r := core.CSVReader{Path: "../../../datasets/the_dbscan_handmade_dataset.csv"}
 	train := r.Read(true)
 	dbscan := DBSCAN{}
-	dbscan.Fit(train, 0.8, 10)
+	dbscan.Fit(train, 0.3, 7)
 	fmt.Println("CLUSTERS:")
 	for _, cluster := range dbscan.LabeledTrain {
 		for _, vec := range cluster {

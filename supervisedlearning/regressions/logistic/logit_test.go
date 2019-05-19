@@ -1,6 +1,8 @@
 package logit
 
 import (
+	"errors"
+	"log"
 	"testing"
 
 	"github.com/bayesiangopher/bayesiangopher/core"
@@ -8,11 +10,18 @@ import (
 
 //Speed of fitting model for BreastCancer dataset using SGD solver
 func BenchmarkFitCanserSGD(b *testing.B) {
-	r := core.CSVReader{Path: "../../../datasets/breast_canser.csv"}
+	r := core.CSVReader{Path: "../../../datasets/the_breast_canser_500rows_dataset.csv"}
 	train := r.Read(true)
-
 	lgt := LGR{solver: SGD, batchs: 20, lrate: 0.0001}
-	lgt.Fit(train, 0)
+	b.ReportAllocs()
+	b.N = 10
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		b.StartTimer()
+		err := lgt.Fit(train, 0)
+		if err != nil { log.Fatal(errors.New("ошибка фита")) }
+		b.StopTimer()
+	}
 }
 
 //Speed of fitting model for BreastCancer dataset using GD solver

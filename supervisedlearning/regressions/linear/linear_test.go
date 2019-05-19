@@ -1,15 +1,15 @@
 package linear
 
 import (
+	"errors"
 	"fmt"
 	"github.com/bayesiangopher/bayesiangopher/core"
-	"github.com/pkg/errors"
 	"testing"
 )
 
 // TestReadDataFromCSV - [OK]
 func TestReadDataFromCSV(t *testing.T) {
-	r := core.CSVReader{Path: "../../../datasets/the_train_WWT_weather_dataset.csv"}
+	r := core.CSVReader{Path: "../../../datasets/the_WWT_weather_10k_dataset.csv"}
 	train := r.Read(true)
 	fmt.Printf("\nFirst line of train: %v.\n", (*train)[0].Data)
 	fmt.Printf("Second line of train: %v.\n", (*train)[1].Data)
@@ -21,27 +21,34 @@ func TestReadDataFromCSV(t *testing.T) {
 		(*train)[0].Elements)
 }
 
+// TestLRQR - [OK]
 func TestLRQR(t *testing.T) {
 	// train creation test:
-	r := core.CSVReader{Path: "../../../datasets/the_train_WWT_weather_dataset.csv"}
+	r := core.CSVReader{Path: "../../../datasets/the_WWT_weather_10k_dataset.csv"}
 	train := r.Read(true)
 
 	// QR method for linear regression test:
-	var standQR LR
-	if err := standQR.Fit(train, 0, QR); err != nil { t.Fatal("ошибка") }
+	standQR := LinearRegression(train, 0, QR)
+	if err := standQR.Fit(); err != nil { t.Fatal("ошибка") }
 	fmt.Printf("\nQR result: %v\n", standQR.parameterVector)
-	fmt.Printf("TrainCoef: %v\n", standQR.TrainCoef())
+}
 
-	// test train:
-	r = core.CSVReader{Path: "../../../datasets/the_test_train_WWT_weather_dataset.csv"}
-	train = r.Read(true)
-	fmt.Printf("TestCoef: %v\n", standQR.TestCoef(train))
+// TestLRSVD - [OK]
+func TestLRSVD(t *testing.T) {
+	// train creation test:
+	r := core.CSVReader{Path: "../../../datasets/the_WWT_weather_10k_dataset.csv"}
+	train := r.Read(true)
+
+	// SVD method for linear regression test:
+	standSVD := LinearRegression(train, 0, SVD)
+	if err := standSVD.Fit(); err != nil { t.Fatal("ошибка") }
+	fmt.Printf("\nQR result: %v\n", standSVD.parameterVector)
 }
 
 // BenchmarkLRQR testing speed and memory use of
 // lr.Fit(QR) function
 func BenchmarkLRQR(b *testing.B) {
-	r := core.CSVReader{Path: "../../../datasets/the_train_WWT_weather_dataset.csv"}
+	r := core.CSVReader{Path: "../../../datasets/the_WWT_weather_10k_dataset.csv"}
 	train := r.Read(true)
 	targetColumn := 0
 	count := 0
@@ -53,13 +60,13 @@ func BenchmarkLRQR(b *testing.B) {
 
 func benchLRQR(train core.Train, targetColumn int, method LRtype) func(b *testing.B) {
 	return func(b *testing.B) {
-		var standQR LR
+		LR := LinearRegression(train, targetColumn, method)
 		b.ReportAllocs()
 		b.N = 10
 		b.ResetTimer()
 		for i := 0; i < b.N; i++ {
 			b.StartTimer()
-			err := standQR.Fit(train, targetColumn, method)
+			err := LR.Fit()
 			fmt.Println("fit succeed")
 			b.StopTimer()
 			if err != nil { panic(errors.New("fitting error")) }
@@ -67,27 +74,10 @@ func benchLRQR(train core.Train, targetColumn int, method LRtype) func(b *testin
 	}
 }
 
-func TestLRSVD(t *testing.T) {
-	// train creation test:
-	r := core.CSVReader{Path: "../../../datasets/the_train_WWT_weather_dataset.csv"}
-	train := r.Read(true)
-
-	// SVD method for linear regression test:
-	var standSVD LR
-	if err := standSVD.Fit(train, 0, SVD); err != nil { t.Fatal("ошибка") }
-	fmt.Printf("SVD result: %v\n\n", standSVD.parameterVector)
-	fmt.Printf("TrainCoef: %v\n", standSVD.TrainCoef())
-
-	// test train:
-	r = core.CSVReader{Path: "../../../datasets/the_test_train_WWT_weather_dataset.csv"}
-	train = r.Read(true)
-	fmt.Printf("TestCoef: %v\n", standSVD.TestCoef(train))
-}
-
 // BenchmarkLRQR testing speed and memory use of
 // lr.Fit(QR) function
 func BenchmarkLRSVD(b *testing.B) {
-	r := core.CSVReader{Path: "../../../datasets/the_train_WWT_weather_dataset.csv"}
+	r := core.CSVReader{Path: "../../../datasets/the_WWT_weather_10k_dataset.csv"}
 	train := r.Read(true)
 	targetColumn := 0
 	count := 0
@@ -99,13 +89,13 @@ func BenchmarkLRSVD(b *testing.B) {
 
 func benchLRSVD(train core.Train, targetColumn int, method LRtype) func(b *testing.B) {
 	return func(b *testing.B) {
-		var standSVD LR
+		LR := LinearRegression(train, targetColumn, method)
 		b.ReportAllocs()
 		b.N = 10
 		b.ResetTimer()
 		for i := 0; i < b.N; i++ {
 			b.StartTimer()
-			err := standSVD.Fit(train, targetColumn, method)
+			err := LR.Fit()
 			fmt.Println("fit succeed")
 			b.StopTimer()
 			if err != nil { panic(errors.New("fitting error")) }

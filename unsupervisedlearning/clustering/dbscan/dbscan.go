@@ -97,7 +97,7 @@ func remove(checkTarget *[]mat.VecDense, i int) *[]mat.VecDense {
 	u := make([]mat.VecDense, len(*checkTarget) - 1)
 	for k := 0; k < len(*checkTarget); k++ {
 		if k == i { continue }
-		if k > i { u[k - 1] = (*checkTarget)[k] }
+		if k > i { u[k - 1] = (*checkTarget)[k]; continue }
 		u[k] = (*checkTarget)[k]
 	}
 	return &u
