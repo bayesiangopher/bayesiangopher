@@ -1,5 +1,6 @@
 import numpy as np
 from sklearn.cluster import KMeans
+import matplotlib.pyplot as plt
 from common import *
 
 
@@ -35,6 +36,19 @@ class KMeansTester:
         assert self.train_test is not None, "тестовые данные не переданы"
         return self.kmeans.score(self.train_test)
 
+    def get_pictures(self):
+        unique_labels = set(self.kmeans.labels_)
+        colors = [plt.cm.Spectral(each) for each in np.linspace(0, 1, len(unique_labels))]
+        fig, ax = plt.subplots(figsize=(20, 10))
+        ax.use_sticky_edges = False
+        ax.margins(0.07)
+        ax.set_xlabel('X Label')
+        ax.set_ylabel('Y Label')
+        ax.set_title(f"clustered_data_set")
+        for c, d in zip(self.kmeans.labels_, self.train):
+            plt.scatter(d[0], d[1], color=colors[c])
+        plt.savefig(f"kmeans_clusters_test.png")
+
 
 def kmeans_test():
     """
@@ -50,6 +64,7 @@ def kmeans_test():
     KMEANS.set_data("../../../datasets/the_xclara_cluster_2.5k_dataset.csv",
                     "../../../datasets/the_xclara_cluster_test_train.csv")
     test(KMEANS)
+    KMEANS.get_pictures()
 
 
 if __name__ == "__main__":
