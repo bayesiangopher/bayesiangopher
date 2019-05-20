@@ -98,7 +98,7 @@ def dbscan_test():
         DBSCAN.create_clusters()
         print("Кластеризация выполнена.")
 
-    DBSCAN = DBSCANTester(size=500)
+    DBSCAN = DBSCANTester(size=500, type="simple")
     print(f"Размер обучающей выборки: {DBSCAN.data.shape}")
     test(DBSCAN)
     DBSCAN.save_data_to_csv()

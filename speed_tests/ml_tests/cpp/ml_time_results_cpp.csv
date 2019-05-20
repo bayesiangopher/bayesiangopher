@@ -1,6 +1,0 @@
-lang,method,trainrows,traincols,"time, ns"
-cpp,dbscan,4000,2,196703739
-cpp,linearregression,10000,2,787417803
-cpp,pca,506,14,170397
-cpp,logisticregression,499,30,3168684502
-cpp,kmeans,2499,2,16683604
