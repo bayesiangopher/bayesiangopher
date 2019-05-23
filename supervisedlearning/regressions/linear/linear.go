@@ -2,6 +2,7 @@ package linear
 
 import (
 	"errors"
+	"fmt"
 	"github.com/bayesiangopher/bayesiangopher/core"
 	"gonum.org/v1/gonum/mat"
 	"log"
@@ -11,6 +12,7 @@ import (
 var (
 	SVDDecompositionError = errors.New("ошибка во время SVD разложения")
 	SVDResultComputeError = errors.New("вектор b посчитан неправильно")
+	CoefBeforeFittingError = errors.New("обучить")
 )
 
 // LRtype specifies the treatment of solving
@@ -115,6 +117,7 @@ func (lr *LR) DeterminationCoefficient(testTrain core.Train) (coef float64) {
 	// 1 - SSres/SStot,
 	// SSres - the residual sum of squares;
 	// SStot - the total sum of squares (proportional to the variance of the data).
+	if lr.parameterVector == nil { log.Fatal(CoefBeforeFittingError) }
 	regressors := mat.NewDense(len(*testTrain), (*testTrain)[0].Elements - 1, nil)
 	regressand := mat.NewVecDense(len(*testTrain), nil)
 	for index, row := range *testTrain {
@@ -128,20 +131,24 @@ func (lr *LR) DeterminationCoefficient(testTrain core.Train) (coef float64) {
 		}
 	}
 	var meanRegresandsValue float64
+	core.VecPrint(regressand)
 	r, _ := regressand.Dims()
 	for i := 0; i < r; i++ {
 		meanRegresandsValue += regressand.AtVec(i)
 	}
 	meanRegresandsValue /= float64(r)
+	fmt.Println(meanRegresandsValue)
 	predictResult := lr.PredictDense(regressors)
 	var SStot float64
 	for i := 0; i < r; i++ {
 		SStot += math.Pow(regressand.AtVec(i) - meanRegresandsValue, 2)
 	}
+	fmt.Println(SStot)
 	var SSres float64
 	for i := 0; i < r; i++ {
 		SSres += math.Pow(regressand.AtVec(i) - predictResult.AtVec(i), 2)
 	}
+	fmt.Println(SSres)
 	return 1 - SSres / SStot
 }
 

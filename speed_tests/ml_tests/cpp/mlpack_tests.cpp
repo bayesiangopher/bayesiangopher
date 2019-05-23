@@ -7,8 +7,8 @@ void linear_fit(int rep){
     arma::mat x_train;
     arma::vec y_train;
 
-    data::Load("/home/opqi/go/src/github.com/bayesiangopher/bayesiangopher/datasets/the_WWT_weather_dataset_xtrain.csv", x_train, true);
-    y_train.load("/home/opqi/go/src/github.com/bayesiangopher/bayesiangopher/datasets/the_WWT_weather_dataset_ytrain.csv");
+    data::Load("../../../datasets/the_WWT_weather_dataset_xtrain.csv", x_train, true);
+    y_train.load("../../../datasets/the_WWT_weather_dataset_ytrain.csv");
 
     LinearRegression lr;
     double diff = 0.0;
@@ -25,8 +25,8 @@ void logit_fit(int rep){
     arma::mat x_train;
     arma::mat y_train;
 
-    data::Load("/home/opqi/go/src/github.com/bayesiangopher/bayesiangopher/datasets/the_breast_canser_dataset_xtrain.csv", x_train, true);
-    data::Load("/home/opqi/go/src/github.com/bayesiangopher/bayesiangopher/datasets/the_breast_canser_dataset_ytrain.csv", y_train, true);
+    data::Load("../../../datasets/the_breast_canser_dataset_xtrain.csv", x_train, true);
+    data::Load("../../../datasets/the_breast_canser_dataset_ytrain.csv", y_train, true);
 
     arma::Row<size_t> responses(y_train.n_cols);
 
@@ -47,7 +47,7 @@ void logit_fit(int rep){
 
 void kmeans_fit(int rep){
     arma::mat x_train;
-    data::Load("/home/opqi/go/src/github.com/bayesiangopher/bayesiangopher/datasets/the_xclara_cluster_train.csv", x_train, true);
+    data::Load("../../../datasets/the_xclara_cluster_train.csv", x_train, true);
 
     arma::Row<size_t> assignments;
     arma::size_t clusters = 3;
@@ -65,7 +65,7 @@ void kmeans_fit(int rep){
 
 void dbscan_fit(int rep){
     arma::mat x_train;
-    data::Load("/home/opqi/go/src/github.com/bayesiangopher/bayesiangopher/datasets/the_dbscan_handmade_dataset.csv", x_train, true);
+    data::Load("../../../datasets/the_dbscan_handmade_dataset.csv", x_train, true);
 
     arma::Row<size_t> assignments;
 
@@ -82,7 +82,7 @@ void dbscan_fit(int rep){
 
 void pca_fit(int rep){
     arma::mat x_train;
-    data::Load("/home/opqi/go/src/github.com/bayesiangopher/bayesiangopher/datasets/the_boston_housing_dataset_train.csv", x_train, true);
+    data::Load("../../../datasets/the_boston_housing_dataset_train.csv", x_train, true);
 
     PCAType<> pca;
     double diff = 0.0;

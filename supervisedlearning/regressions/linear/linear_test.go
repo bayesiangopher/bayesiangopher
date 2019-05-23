@@ -33,6 +33,21 @@ func TestLRQR(t *testing.T) {
 	fmt.Printf("\nQR result: %v\n", standQR.parameterVector)
 }
 
+// TestDeterminationCoefficient - [OK]
+func TestDeterminationCoefficient(t *testing.T) {
+	// train creation test:
+	r := core.CSVReader{Path: "../../../datasets/the_WWT_weather_10k_dataset.csv"}
+	train := r.Read(true)
+	rTest := core.CSVReader{Path: "../../../datasets/the_WWT_weather_test_train.csv"}
+	trainTest := rTest.Read(true)
+
+	// SVD method for linear regression test:
+	standSVD := LinearRegression(train, 0, SVD)
+	if err := standSVD.Fit(); err != nil { t.Fatal("ошибка") }
+	fmt.Printf("\nQR result: %v\n", standSVD.parameterVector)
+	fmt.Println(standSVD.DeterminationCoefficient(trainTest))
+}
+
 // TestLRSVD - [OK]
 func TestLRSVD(t *testing.T) {
 	// train creation test:
