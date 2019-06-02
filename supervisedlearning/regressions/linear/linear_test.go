@@ -31,6 +31,12 @@ func TestLRQR(t *testing.T) {
 	standQR := LinearRegression(train, 0, QR)
 	if err := standQR.Fit(); err != nil { t.Fatal("ошибка") }
 	fmt.Printf("\nQR result: %v\n", standQR.parameterVector)
+
+	rTest := core.CSVReader{Path: "../../../datasets/the_WWT_weather_test_no_y_train.csv"}
+	trainTest := rTest.Read(true)
+	result := standQR.Predict(trainTest, nil)
+	core.VecPrint(result)
+
 }
 
 // TestDeterminationCoefficient - [OK]
@@ -58,6 +64,11 @@ func TestLRSVD(t *testing.T) {
 	standSVD := LinearRegression(train, 0, SVD)
 	if err := standSVD.Fit(); err != nil { t.Fatal("ошибка") }
 	fmt.Printf("\nQR result: %v\n", standSVD.parameterVector)
+
+	rTest := core.CSVReader{Path: "../../../datasets/the_WWT_weather_test_no_y_train.csv"}
+	trainTest := rTest.Read(true)
+	result := standSVD.Predict(trainTest, nil)
+	core.VecPrint(result)
 }
 
 // BenchmarkLRQR testing speed and memory use of
