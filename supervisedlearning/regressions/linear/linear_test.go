@@ -37,6 +37,8 @@ func TestLRQR(t *testing.T) {
 	result := standQR.Predict(trainTest, nil)
 	core.VecPrint(result)
 
+	fmt.Printf("result: %v", result)
+
 }
 
 // TestDeterminationCoefficient - [OK]
